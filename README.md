@@ -92,7 +92,7 @@ Execute commands:
 * add option to modify certificate properties
 * generate random admin password at initialization phase
 * add versioning
-* add automatic ssl/tls (check how [ponzu](https://github.com/ponzu-cms/ponzu) did)
+* add automatic ssl/tls (check how [ponzu](https://github.com/ponzu-cms/ponzu) did it)
 
 
 ## License
