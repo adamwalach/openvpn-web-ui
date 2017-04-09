@@ -1,0 +1,104 @@
+{{ template "layout/base.html" . }}
+
+{{define "head"}}
+<title>OpenVPN - Settings</title>
+{{end}}
+
+{{define "body"}}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="box box-info">
+      <div class="box-header with-border">
+        <h3 class="box-title">Clients certificates</h3>
+
+      </div>
+      <!-- /.box-header -->
+
+      <div class="box-body">
+        <!--if .ovstatus -->
+        <div class="table-responsive">
+          <table class="table no-margin">
+            <thead>
+            <tr>
+              <th>Name</th>
+              <th>State</th>
+              <th>Expiration</th>
+              <th>Revocation</th>
+              <th>Serial</th>
+              <th>Details</th>
+              <th></th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {{range .certificates}}
+              {{ if ne .Details.Name "server"}}
+              <tr>
+                  <td>
+                    <a href="{{urlfor "CertificatesController.Download" ":key" .Details.Name}}">
+                      {{ .Details.Name }}
+                    </a>
+                  </td>
+                  <td>{{ .EntryType }}</td>
+                  <td>{{ dateformat .ExpirationT "2006-01-02 15:04"}}</td>
+                  {{if eq .Revocation ""}}
+                    <td></td>
+                  {{else}}
+                    <td>{{ dateformat .RevocationT "2006-01-02 15:04"}}</td>
+                  {{end}}
+                  <td>{{ .Serial }}</td>
+                  <td>
+                    <span class="label label-warning">Country: {{ .Details.Country }}</span>
+                    <span class="label label-warning">CN: {{ .Details.CN }}</span>
+                    <span class="label label-warning">Email: {{ .Details.Email }}</span>
+                  </td>
+              </tr>
+              {{ end }}
+            {{end}}
+
+            </tbody>
+          </table>
+        </div>
+        <!-- /.table-responsive -->
+      </div>
+      <!--else
+          Fix your configuration
+      end-->
+      <div class="box-footer clearfix">
+      </div>
+      <!--
+      <div class="box-footer clearfix">
+        <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New Order</a>
+        <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All Orders</a>
+      </div>
+    -->
+      <!-- /.box-footer -->
+    </div>
+    <!-- /.box -->
+  </div>
+</div>
+
+<div class="box box-primary">
+  <div class="box-header with-border">
+    <h3 class="box-title">Create a new certificate</h3>
+  </div>
+  <!-- /.box-header -->
+  <!-- form start -->
+  {{template "common/alert.html" .}}
+  <form role="form" action="{{urlfor "CertificatesController.Post"}}" method="post">
+    <div class="box-body">
+      <div class="form-group {{if field_error_exist .validation "Name" }}has-error{{end}}" >
+        <label for="name">Name</label>
+        <input type="text" class="form-control" id="Name" name="Name">
+      </div>
+      <span class="help-block"> {{template "common/fvalid.html" field_error_message .validation "Name" }}</span>
+    </div>
+    <!-- /.box-body -->
+
+    <div class="box-footer">
+      <button type="submit" class="btn btn-primary">Create</button>
+    </div>
+    </form>
+    </div>
+{{end}}
