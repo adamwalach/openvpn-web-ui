@@ -7,7 +7,6 @@ services:
     container_name: openvpn
     ports:
      - "1194:1194/udp"
-     - "2080:2080/tcp"
     restart: always
     depends_on:
       - "gui"
