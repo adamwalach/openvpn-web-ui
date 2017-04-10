@@ -89,6 +89,7 @@ Execute commands:
 
 ## Todo
 
+* add unit tests
 * add option to modify certificate properties
 * generate random admin password at initialization phase
 * add versioning
