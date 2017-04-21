@@ -33,7 +33,8 @@ func (c *APISignalController) Send() {
 	}
 	if err := client.Signal(p.Sname); err != nil {
 		c.ServeJSONError(err.Error())
-	} else {
-		c.ServeJSONMessage("Signal sent")
+		return
 	}
+
+	c.ServeJSONMessage("Signal sent")
 }

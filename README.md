@@ -5,6 +5,8 @@ OpenVPN server web administration interface.
 
 Goal: create quick to deploy and easy to use solution that makes work with small OpenVPN environments a breeze.
 
+If you have docker and docker-compose installed, you can jump directly to [installation](#Prod).
+
 ![Status page](docs/images/preview_status.png?raw=true)
 
 Please note this project is in alpha stage. It still needs some work to make it secure and feature complete.
@@ -29,9 +31,8 @@ Please note this project is in alpha stage. It still needs some work to make it 
 
 After startup web service is visible on port 8080. To login use the following default credentials:
 
-username: admin
-
-password: b3secure (this will be soon replaced with random password)
+* username: admin
+* password: b3secure (this will be soon replaced with random password)
 
 Please change password to your own immediately!
 
