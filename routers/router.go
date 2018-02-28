@@ -13,6 +13,12 @@ import (
 )
 
 func init() {
+	//HTTPS
+	beego.BConfig.Listen.EnableHTTPS = true
+	beego.BConfig.Listen.HTTPSPort = 8081
+	beego.BConfig.Listen.HTTPSCertFile = "/etc/openvpn-gui/ssl/ssl.crt"
+	beego.BConfig.Listen.HTTPSKeyFile = "/opt/openvpn-gui/ssl/ssl.key"
+
 	beego.SetStaticPath("/swagger", "swagger")
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/login", &controllers.LoginController{}, "get,post:Login")
