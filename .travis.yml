@@ -9,3 +9,5 @@ before_install:
 
 script:
 - cd build; ./pack.sh
+- cd build; ./build.sh
+
