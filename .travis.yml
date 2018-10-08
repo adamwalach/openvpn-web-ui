@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+- pwd; ls -la
+- docker pull awalach/beego
+
+script:
+- cd build; ./pack.sh
