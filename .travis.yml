@@ -8,6 +8,7 @@ before_install:
 - docker pull awalach/beego:1.9.4
 
 script:
-- cd build; ./pack.sh
-- cd build; ./build.sh
+- cd build || travis_terminate 1
+- ./pack.sh || travis_terminate 1
+- ./build.sh || travis_terminate 1
 
