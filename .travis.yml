@@ -12,3 +12,9 @@ script:
 - ./pack.sh || travis_terminate 1
 - ./build.sh || travis_terminate 1
 
+deploy:
+  provider: script
+  script: bash build/docker_push
+#  on:
+#    branch: master
+
