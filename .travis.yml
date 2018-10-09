@@ -14,7 +14,7 @@ script:
 
 deploy:
   provider: script
-  script: bash build/docker_push.sh
+  script: bash ./docker_push.sh
   on:
     branch: travis-test
 
