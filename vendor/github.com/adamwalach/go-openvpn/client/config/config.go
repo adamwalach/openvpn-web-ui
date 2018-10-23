@@ -2,7 +2,7 @@ package config
 
 import (
 	"bytes"
-	"html/template"
+	"text/template"
 	"io/ioutil"
 )
 
