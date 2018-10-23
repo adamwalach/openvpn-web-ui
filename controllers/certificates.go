@@ -34,6 +34,21 @@ func (c *CertificatesController) NestPrepare() {
 	}
 }
 
+// @router /certificates/single-config/:key [get]
+func (c *CertificatesController) DownloadSingleConfig() {
+	name := c.GetString(":key")
+	filename := fmt.Sprintf("%s.ovpn", name)
+
+	c.Ctx.Output.Header("Content-Type", "text/plain")
+  c.Ctx.Output.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+
+	keysPath := models.GlobalCfg.OVConfigPath + "keys/"
+  if cfgPath, err := saveClientSingleConfig(name, keysPath); err == nil {
+		c.Ctx.Output.Download(cfgPath, filename);
+	}
+
+}
+
 // @router /certificates/:key [get]
 func (c *CertificatesController) Download() {
 	name := c.GetString(":key")
