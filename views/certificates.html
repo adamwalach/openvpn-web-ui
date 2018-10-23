@@ -37,7 +37,10 @@
               <tr>
                   <td>
                     <a href="{{urlfor "CertificatesController.Download" ":key" .Details.Name}}">
-                      {{ .Details.Name }}
+                      {{ .Details.Name }}.zip
+                    </a>
+                    <a href="{{urlfor "CertificatesController.DownloadSingleConfig" ":key" .Details.Name}}">
+                      {{ .Details.Name }}.ovpn
                     </a>
                   </td>
                   <td>{{ .EntryType }}</td>
