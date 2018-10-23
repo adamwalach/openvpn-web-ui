@@ -158,3 +158,36 @@ func saveClientConfig(name string) (string, error) {
 
 	return destPath, nil
 }
+
+func saveClientSingleConfig(name string, pathString string) (string, error) {
+	cfg := config.New()
+	cfg.ServerAddress = models.GlobalCfg.ServerAddress
+	cfg.Cert = readCert(pathString + name + ".crt");
+	cfg.Key = readCert(pathString + name + ".key");
+	cfg.Ca = readCert(pathString + "ca.crt");
+	serverConfig := models.OVConfig{Profile: "default"}
+	serverConfig.Read("Profile")
+	cfg.Port = serverConfig.Port
+	cfg.Proto = serverConfig.Proto
+	cfg.Auth = serverConfig.Auth
+	cfg.Cipher = serverConfig.Cipher
+	cfg.Keysize = serverConfig.Keysize
+
+	destPath := models.GlobalCfg.OVConfigPath + "keys/" + name + ".ovpn"
+	if err := config.SaveToFile("conf/openvpn-client-config.ovpn.tpl",
+		cfg, destPath); err != nil {
+		beego.Error(err)
+		return "", err
+	}
+
+	return destPath, nil
+}
+
+func readCert(path string) (string) {
+ 	buff, err := ioutil.ReadFile(path) // just pass the file name
+  if err != nil {
+		beego.Error(err)
+		return "";
+  }
+  return string(buff);
+}
