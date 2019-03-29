@@ -2,10 +2,13 @@ package controllers
 
 import (
 	"archive/zip"
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"text/template"
 	"time"
 
 	"github.com/adamwalach/go-openvpn/client/config"
@@ -47,6 +50,10 @@ func (c *CertificatesController) Download() {
 	if cfgPath, err := saveClientConfig(name); err == nil {
 		addFileToZip(zw, cfgPath)
 	}
+	if ovpnPath, err := saveClientOvpn(name); err == nil {
+		addFileToZip(zw, ovpnPath)
+	}
+
 	addFileToZip(zw, keysPath+"ca.crt")
 	addFileToZip(zw, keysPath+name+".crt")
 	addFileToZip(zw, keysPath+name+".key")
@@ -157,4 +164,61 @@ func saveClientConfig(name string) (string, error) {
 	}
 
 	return destPath, nil
+}
+
+func saveClientOvpn(name string) (string, error) {
+	cfg := config.New()
+	cfg.ServerAddress = models.GlobalCfg.ServerAddress
+	serverConfig := models.OVConfig{Profile: "default"}
+	serverConfig.Read("Profile")
+	cfg.Port = serverConfig.Port
+	cfg.Proto = serverConfig.Proto
+	cfg.Auth = serverConfig.Auth
+	cfg.Cipher = serverConfig.Cipher
+	cfg.Keysize = serverConfig.Keysize
+
+	keysPath := models.GlobalCfg.OVConfigPath + "keys/"
+	caFilePath := keysPath + "ca.crt"
+	certFilePath := keysPath + name + ".crt"
+	keyFilePath := keysPath + name + ".key"
+
+	if caByte, err := ioutil.ReadFile(caFilePath); err == nil {
+		cfg.Ca = string(caByte)
+	}
+	if certByte, err := ioutil.ReadFile(certFilePath); err == nil {
+		cfg.Cert = string(certByte)
+	}
+	if keyByte, err := ioutil.ReadFile(keyFilePath); err == nil {
+		cfg.Key = string(keyByte)
+	}
+
+	destPath := models.GlobalCfg.OVConfigPath + "keys/" + name + ".ovpn"
+	if err := saveToFile("conf/openvpn-client-ovpn.tpl",
+		cfg, destPath); err != nil {
+		beego.Error(err)
+		return "", err
+	}
+
+	return destPath, nil
+}
+
+//SaveToFile reads teamplate and writes result to destination file  with text/template
+func saveToFile(tplPath string, c config.Config, destPath string) error {
+	templateByte, err := ioutil.ReadFile(tplPath)
+	if err != nil {
+		return err
+	}
+
+	t := template.New("config")
+	temp, err := t.Parse(string(templateByte))
+	if err != nil {
+		return err
+	}
+
+	buf := new(bytes.Buffer)
+	temp.Execute(buf, c)
+
+	str := buf.String()
+	fmt.Printf(str)
+	return ioutil.WriteFile(destPath, []byte(str), 0644)
 }

@@ -1,9 +1,8 @@
 management {{ .Management }}
+verb 3
 
 port {{ .Port }}
 proto {{ .Proto }}
-
-dev tun
 
 ca {{ .Ca }}
 cert {{ .Cert }}
@@ -14,21 +13,27 @@ keysize {{ .Keysize }}
 auth {{ .Auth }}
 dh {{ .Dh }}
 
-server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist {{ .IfconfigPoolPersist }}
-push "route 10.8.0.0 255.255.255.0"
+server 192.168.255.0 255.255.255.0
+### Route Configurations Below
+route 192.168.254.0 255.255.255.0
+
+### Push Configurations Below
+push "block-outside-dns"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
+push "comp-lzo no"
 
+dev tun
+key-direction 0
 keepalive {{ .Keepalive }}
-
-comp-lzo
-max-clients {{ .MaxClients }}
-
 persist-key
 persist-tun
-
-log         openvpn.log
-verb 3
-
+user nobody
+group nogroup
+comp-lzo no
 mute 10
+
+max-clients {{ .MaxClients }}
+
+log  openvpn.log
