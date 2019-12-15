@@ -2,6 +2,7 @@ package models
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/adamwalach/go-openvpn/server/config"
 	"github.com/astaxie/beego"
@@ -11,11 +12,11 @@ import (
 
 var GlobalCfg Settings
 
-func init() {
+func Init(configDir string) {
 	initDB()
 	createDefaultUsers()
 	createDefaultSettings()
-	createDefaultOVConfig()
+	createDefaultOVConfig(configDir)
 }
 
 func initDB() {
@@ -92,7 +93,7 @@ func createDefaultSettings() {
 	}
 }
 
-func createDefaultOVConfig() {
+func createDefaultOVConfig(configDir string) {
 	c := OVConfig{
 		Profile: "default",
 		Config: config.Config{
@@ -122,8 +123,7 @@ func createDefaultOVConfig() {
 		path := GlobalCfg.OVConfigPath + "/server.conf"
 		if _, err = os.Stat(path); os.IsNotExist(err) {
 			destPath := GlobalCfg.OVConfigPath + "/server.conf"
-			if err = config.SaveToFile("conf/openvpn-server-config.tpl",
-				c.Config, destPath); err != nil {
+			if err = config.SaveToFile(filepath.Join(configDir, "conf/openvpn-server-config.tpl"), c.Config, destPath); err != nil {
 				beego.Error(err)
 			}
 		}
