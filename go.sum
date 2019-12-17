@@ -4,6 +4,8 @@ github.com/adamwalach/go-openvpn v0.0.0-20170320215004-37de024281f7 h1:+oHwRXuhR
 github.com/adamwalach/go-openvpn v0.0.0-20170320215004-37de024281f7/go.mod h1:NGr063te47IkJZWpaD3mJZhxwgNhEcg1JoLT7pmf0tw=
 github.com/astaxie/beego v1.7.2 h1:dShQyNPvJN+jP80LrgBlzpLooYGqUa6q8tE2zOY9hHE=
 github.com/astaxie/beego v1.7.2/go.mod h1:0R4++1tUqERR0WYFWdfkcrsyoVBCG4DgpDGokT3yb+U=
+github.com/astaxie/beego v1.10.0 h1:s0OZ1iUO0rl8+lwWZfPK/0GhQi1tFUcIClTevyz48Pg=
+github.com/astaxie/beego v1.10.0/go.mod h1:0R4++1tUqERR0WYFWdfkcrsyoVBCG4DgpDGokT3yb+U=
 github.com/cloudfoundry/gosigar v0.0.0-20160602191207-c32d31af94b0 h1:bAsRT4rwL5zn5mgokFNupETvPyI/XGbzNSCAdnPKw9I=
 github.com/cloudfoundry/gosigar v0.0.0-20160602191207-c32d31af94b0/go.mod h1:3qLfc2GlfmwOx2+ZDaRGH3Y9fwQ0sQeaAleo2GV5pH0=
 github.com/mattn/go-sqlite3 v1.2.1-0.20161215041557-2d44decb4941 h1:sOMokCoLCccKdOn2MPRNXzZQTolln336B+yl7IPb658=
@@ -13,9 +15,12 @@ golang.org/x/crypto v0.0.0-20170209233901-453249f01cfe/go.mod h1:6SG95UA2DQfeDnf
 golang.org/x/net v0.0.0-20161215194249-45e771701b81 h1:fw6vKYqWlQqaVrIv7KcFK8YHLSj7xKY86A9h28yw1ws=
 golang.org/x/net v0.0.0-20161215194249-45e771701b81/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/sys v0.0.0-20160429193239-b776ec39b3e5/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/hlandau/easymetric.v1 v1.0.0 h1:ZbfbH7W3giuVDjWUoFhDOjjv20hiPr5HZ2yMV5f9IeE=
 gopkg.in/hlandau/easymetric.v1 v1.0.0/go.mod h1:yh75hypuFzAxmvECh3ZKGCvFnIfapYJh2wv7ASaX2RE=
 gopkg.in/hlandau/measurable.v1 v1.0.1 h1:wH5UZKCRUnRr1iD+xIZfwhtxhmr+bprRJttqA1Rklf4=
 gopkg.in/hlandau/measurable.v1 v1.0.1/go.mod h1:6N+SYJGMTmetsx7wskULP+juuO+++tsHJkAgzvzsbuM=
 gopkg.in/hlandau/passlib.v1 v1.0.9 h1:VfsIu2uKK6xsr9VHCtJtIgNuZ/RNUrIi67hxl8K/7Gg=
 gopkg.in/hlandau/passlib.v1 v1.0.9/go.mod h1:wxGAv2CtQHlzWY8NJp+p045yl4WHyX7v2T6XbOcmqjM=
+gopkg.in/yaml.v2 v2.2.7 h1:VUgggvou5XRW9mHwD/yXxIYSMtY0zoKQf/v226p2nyo=
+gopkg.in/yaml.v2 v2.2.7/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
