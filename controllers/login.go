@@ -1,13 +1,10 @@
 package controllers
 
 import (
-	"errors"
 	"html/template"
 	"time"
 
-	passlib "gopkg.in/hlandau/passlib.v1"
-
-	"github.com/adamwalach/openvpn-web-ui/models"
+	"github.com/adamwalach/openvpn-web-ui/lib"
 	"github.com/astaxie/beego"
 )
 
@@ -31,8 +28,16 @@ func (c *LoginController) Login() {
 	login := c.GetString("login")
 	password := c.GetString("password")
 
-	user, err := Authenticate(login, password)
-	if err != nil || user.Id < 1 {
+	user, err := lib.Authenticate(login, password, beego.AppConfig.String("AuthType"))
+
+	if err != nil {
+		flash.Warning(err.Error())
+		flash.Store(&c.Controller)
+		return
+	}
+	user.Lastlogintime = time.Now()
+	err = user.Update("Lastlogintime")
+	if err != nil {
 		flash.Warning(err.Error())
 		flash.Store(&c.Controller)
 		return
@@ -52,26 +57,4 @@ func (c *LoginController) Logout() {
 	flash.Store(&c.Controller)
 
 	c.Ctx.Redirect(302, c.URLFor("LoginController.Login"))
-}
-
-func Authenticate(login string, password string) (user *models.User, err error) {
-	msg := "invalid login or password."
-	user = &models.User{Login: login}
-
-	if err := user.Read("Login"); err != nil {
-		if err.Error() == "<QuerySeter> no row found" {
-			err = errors.New(msg)
-		}
-		return user, err
-	} else if user.Id < 1 {
-		// No user
-		return user, errors.New(msg)
-		//} else if user.Password != password {
-	} else if _, err := passlib.Verify(password, user.Password); err != nil {
-		// No matched password
-		return user, errors.New(msg)
-	}
-	user.Lastlogintime = time.Now()
-	user.Update("Lastlogintime")
-	return user, nil
 }

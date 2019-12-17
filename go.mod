@@ -5,6 +5,7 @@ require (
 	github.com/adamwalach/go-openvpn v0.0.0-20170320215004-37de024281f7
 	github.com/astaxie/beego v1.10.0
 	github.com/cloudfoundry/gosigar v0.0.0-20160602191207-c32d31af94b0
+	github.com/go-ldap/ldap/v3 v3.1.5
 	github.com/mattn/go-sqlite3 v1.2.1-0.20161215041557-2d44decb4941
 	golang.org/x/crypto v0.0.0-20170209233901-453249f01cfe
 	golang.org/x/net v0.0.0-20161215194249-45e771701b81
