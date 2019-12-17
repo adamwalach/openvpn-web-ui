@@ -12,7 +12,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-func init() {
+func Init() {
 	beego.SetStaticPath("/swagger", "swagger")
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/login", &controllers.LoginController{}, "get,post:Login")

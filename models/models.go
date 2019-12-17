@@ -15,7 +15,7 @@ var GlobalCfg Settings
 func Init(configDir string) {
 	initDB()
 	createDefaultUsers()
-	createDefaultSettings()
+	createDefaultSettings(configDir)
 	createDefaultOVConfig(configDir)
 }
 
@@ -71,13 +71,13 @@ func createDefaultUsers() {
 
 }
 
-func createDefaultSettings() {
+func createDefaultSettings(configDir string) {
 	s := Settings{
 		Profile:       "default",
 		MIAddress:     "openvpn:2080",
 		MINetwork:     "tcp",
 		ServerAddress: "127.0.0.1",
-		OVConfigPath:  "/etc/openvpn/",
+		OVConfigPath:  configDir,
 	}
 	o := orm.NewOrm()
 	if created, _, err := o.ReadOrCreate(&s, "Profile"); err == nil {
@@ -123,7 +123,7 @@ func createDefaultOVConfig(configDir string) {
 		path := GlobalCfg.OVConfigPath + "/server.conf"
 		if _, err = os.Stat(path); os.IsNotExist(err) {
 			destPath := GlobalCfg.OVConfigPath + "/server.conf"
-			if err = config.SaveToFile(filepath.Join(configDir, "conf/openvpn-server-config.tpl"), c.Config, destPath); err != nil {
+			if err = config.SaveToFile(filepath.Join(configDir, "openvpn-server-config.tpl"), c.Config, destPath); err != nil {
 				beego.Error(err)
 			}
 		}
