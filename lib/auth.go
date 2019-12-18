@@ -9,7 +9,6 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/go-ldap/ldap/v3"
 	"gopkg.in/hlandau/passlib.v1"
-	"log"
 )
 
 var authError error
@@ -19,7 +18,7 @@ func init() {
 }
 
 func Authenticate(login string, password string, authType string) (*models.User, error) {
-	log.Println("auth type: ", authType)
+	beego.Info("auth type: ", authType)
 	if authType == "ldap" {
 		return authenticateLdap(login, password)
 	} else {
@@ -31,15 +30,15 @@ func authenticateSimple(login string, password string) (*models.User, error) {
 	user := &models.User{Login: login}
 	err := user.Read("Login")
 	if err != nil {
-		log.Println(err)
+		beego.Error(err)
 		return nil, authError
 	}
 	if user.Id < 1 {
-		log.Println(err)
+		beego.Error(err)
 		return nil, authError
 	}
 	if _, err := passlib.Verify(password, user.Password); err != nil {
-		log.Println(err)
+		beego.Error(err)
 		return nil, authError
 	}
 	return user, nil
@@ -52,7 +51,7 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 	ldapTransport := beego.AppConfig.String("LdapTransport")
 	skipVerify, err := beego.AppConfig.Bool("LdapInsecureSkipVerify")
 	if err != nil {
-		log.Println("LDAP Dial:", err)
+		beego.Error("LDAP Dial:", err)
 		return nil, authError
 	}
 
@@ -63,14 +62,14 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 	}
 
 	if err != nil {
-		log.Println("LDAP Dial:", err)
+		beego.Error("LDAP Dial:", err)
 		return nil, authError
 	}
 
 	if ldapTransport == "starttls" {
 		err = connection.StartTLS(&tls.Config{InsecureSkipVerify: skipVerify})
 		if err != nil {
-			log.Println("LDAP Start TLS:", err)
+			beego.Error("LDAP Start TLS:", err)
 			return nil, authError
 		}
 	}
@@ -81,7 +80,7 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 
 	err = connection.Bind(fmt.Sprintf(bindDn, login), password)
 	if err != nil {
-		log.Println("LDAP Bind:", err)
+		beego.Error("LDAP Bind:", err)
 		return nil, authError
 	}
 
@@ -91,7 +90,7 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 		err = user.Insert()
 	}
 	if err != nil {
-		log.Println(err)
+		beego.Error(err)
 		return nil, authError
 	}
 

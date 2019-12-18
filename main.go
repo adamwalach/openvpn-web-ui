@@ -11,20 +11,24 @@ import (
 	"path/filepath"
 )
 
-func init() {
+func main() {
 	configDir := flag.String("config", "conf", "Path to config dir")
 	flag.Parse()
+
 	configFile := filepath.Join(*configDir, "app.conf")
 	fmt.Println("Config file:", configFile)
 	err := beego.LoadAppConfig("ini", configFile)
-	models.Init(*configDir)
+
+	models.InitDB()
+	models.CreateDefaultUsers()
+	models.CreateDefaultSettings()
+	models.CreateDefaultOVConfig(*configDir)
+
 	routers.Init()
 	if err != nil {
 		panic(err)
 	}
-}
 
-func main() {
 	lib.AddFuncMaps()
 	beego.Run()
 }
