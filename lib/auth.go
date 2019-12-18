@@ -15,10 +15,11 @@ import (
 var authError error
 
 func init() {
-	authError = errors.New("invalid login or password")
+	authError = errors.New("Invalid login or password.")
 }
 
 func Authenticate(login string, password string, authType string) (*models.User, error) {
+	log.Println("auth type: ", authType)
 	if authType == "ldap" {
 		return authenticateLdap(login, password)
 	} else {
@@ -30,15 +31,15 @@ func authenticateSimple(login string, password string) (*models.User, error) {
 	user := &models.User{Login: login}
 	err := user.Read("Login")
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		return nil, authError
 	}
 	if user.Id < 1 {
-		log.Print(err)
+		log.Println(err)
 		return nil, authError
 	}
 	if _, err := passlib.Verify(password, user.Password); err != nil {
-		log.Print(err)
+		log.Println(err)
 		return nil, authError
 	}
 	return user, nil
@@ -51,7 +52,7 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 	ldapTransport := beego.AppConfig.String("LdapTransport")
 	skipVerify, err := beego.AppConfig.Bool("LdapInsecureSkipVerify")
 	if err != nil {
-		log.Print("LDAP Dial:", err)
+		log.Println("LDAP Dial:", err)
 		return nil, authError
 	}
 
@@ -62,14 +63,14 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 	}
 
 	if err != nil {
-		log.Print("LDAP Dial:", err)
+		log.Println("LDAP Dial:", err)
 		return nil, authError
 	}
 
 	if ldapTransport == "starttls" {
 		err = connection.StartTLS(&tls.Config{InsecureSkipVerify: skipVerify})
 		if err != nil {
-			log.Print("LDAP Start TLS:", err)
+			log.Println("LDAP Start TLS:", err)
 			return nil, authError
 		}
 	}
@@ -80,7 +81,7 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 
 	err = connection.Bind(fmt.Sprintf(bindDn, login), password)
 	if err != nil {
-		log.Print("LDAP Bind:", err)
+		log.Println("LDAP Bind:", err)
 		return nil, authError
 	}
 
@@ -90,7 +91,7 @@ func authenticateLdap(login string, password string) (*models.User, error) {
 		err = user.Insert()
 	}
 	if err != nil {
-		log.Print(err)
+		log.Println(err)
 		return nil, authError
 	}
 
