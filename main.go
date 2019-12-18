@@ -12,14 +12,13 @@ import (
 )
 
 func init() {
-	fmt.Println("init")
 	configDir := flag.String("config", "conf", "Path to config dir")
 	flag.Parse()
 	configFile := filepath.Join(*configDir, "app.conf")
-	fmt.Println("Config file", configFile)
+	fmt.Println("Config file:", configFile)
 	err := beego.LoadAppConfig("ini", configFile)
 	models.Init(*configDir)
-  routers.Init()
+	routers.Init()
 	if err != nil {
 		panic(err)
 	}
