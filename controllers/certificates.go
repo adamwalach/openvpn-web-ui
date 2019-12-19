@@ -3,6 +3,7 @@ package controllers
 import (
 	"archive/zip"
 	"fmt"
+	"github.com/adamwalach/openvpn-web-ui/state"
 	"io"
 	"os"
 	"path/filepath"
@@ -43,13 +44,13 @@ func (c *CertificatesController) Download() {
 
 	zw := zip.NewWriter(c.Controller.Ctx.ResponseWriter)
 
-	keysPath := models.GlobalCfg.OVConfigPath + "keys/"
+	keysPath := state.GlobalCfg.OVConfigPath + "keys/"
 	if cfgPath, err := saveClientConfig(name); err == nil {
-		addFileToZip(zw, cfgPath)
+		_ = addFileToZip(zw, cfgPath)
 	}
-	addFileToZip(zw, keysPath+"ca.crt")
-	addFileToZip(zw, keysPath+name+".crt")
-	addFileToZip(zw, keysPath+name+".key")
+	_ = addFileToZip(zw, keysPath+"ca.crt")
+	_ = addFileToZip(zw, keysPath+name+".crt")
+	_ = addFileToZip(zw, keysPath+name+".key")
 
 	if err := zw.Close(); err != nil {
 		beego.Error(err)
@@ -58,10 +59,9 @@ func (c *CertificatesController) Download() {
 
 func addFileToZip(zw *zip.Writer, path string) error {
 	header := &zip.FileHeader{
-		Name:         filepath.Base(path),
-		Method:       zip.Store,
-		ModifiedTime: uint16(time.Now().UnixNano()),
-		ModifiedDate: uint16(time.Now().UnixNano()),
+		Name:     filepath.Base(path),
+		Method:   zip.Store,
+		Modified: time.Now(),
 	}
 	fi, err := os.Open(path)
 	if err != nil {
@@ -90,7 +90,7 @@ func (c *CertificatesController) Get() {
 }
 
 func (c *CertificatesController) showCerts() {
-	path := models.GlobalCfg.OVConfigPath + "keys/index.txt"
+	path := state.GlobalCfg.OVConfigPath + "keys/index.txt"
 	certs, err := lib.ReadCerts(path)
 	if err != nil {
 		beego.Error(err)
@@ -138,18 +138,18 @@ func validateCertParams(cert NewCertParams) map[string]map[string]string {
 
 func saveClientConfig(name string) (string, error) {
 	cfg := config.New()
-	cfg.ServerAddress = models.GlobalCfg.ServerAddress
+	cfg.ServerAddress = state.GlobalCfg.ServerAddress
 	cfg.Cert = name + ".crt"
 	cfg.Key = name + ".key"
 	serverConfig := models.OVConfig{Profile: "default"}
-	serverConfig.Read("Profile")
+	_ = serverConfig.Read("Profile")
 	cfg.Port = serverConfig.Port
 	cfg.Proto = serverConfig.Proto
 	cfg.Auth = serverConfig.Auth
 	cfg.Cipher = serverConfig.Cipher
 	cfg.Keysize = serverConfig.Keysize
 
-	destPath := models.GlobalCfg.OVConfigPath + "keys/" + name + ".conf"
+	destPath := state.GlobalCfg.OVConfigPath + "keys/" + name + ".conf"
 	if err := config.SaveToFile("conf/openvpn-client-config.tpl",
 		cfg, destPath); err != nil {
 		beego.Error(err)

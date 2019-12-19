@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/adamwalach/openvpn-web-ui/state"
 
 	mi "github.com/adamwalach/go-openvpn/server/mi"
-	"github.com/adamwalach/openvpn-web-ui/models"
 )
 
 //APISignalController sends signals to OpenVPN daemon
@@ -25,7 +25,7 @@ type SignalParams struct {
 // @Failure 400 request failure
 // @router / [post]
 func (c *APISignalController) Send() {
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	p := SignalParams{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &p); err != nil {
 		c.ServeJSONError(err.Error())

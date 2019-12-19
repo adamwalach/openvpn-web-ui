@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"encoding/json"
+	"github.com/adamwalach/openvpn-web-ui/state"
 
-	mi "github.com/adamwalach/go-openvpn/server/mi"
-	"github.com/adamwalach/openvpn-web-ui/models"
+	"github.com/adamwalach/go-openvpn/server/mi"
 )
 
 //APISessionController manages vpn sessions
@@ -24,7 +24,7 @@ type KillParams struct {
 // @Failure 400 request failure
 // @router / [get]
 func (c *APISessionController) Get() {
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	status, err := client.GetStatus()
 	if err != nil {
 		c.ServeJSONError(err.Error())
@@ -41,7 +41,7 @@ func (c *APISessionController) Get() {
 // @Failure 400 request failure
 // @router / [delete]
 func (c *APISessionController) Kill() {
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	p := KillParams{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &p); err != nil {
 		c.ServeJSONError(err.Error())

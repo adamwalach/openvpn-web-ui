@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/adamwalach/openvpn-web-ui/lib"
-	"github.com/adamwalach/openvpn-web-ui/models"
+	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
 
 	mi "github.com/adamwalach/go-openvpn/server/mi"
@@ -25,7 +25,7 @@ func (c *MainController) NestPrepare() {
 func (c *MainController) Get() {
 	c.Data["sysinfo"] = lib.GetSystemInfo()
 	lib.Dump(lib.GetSystemInfo())
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	status, err := client.GetStatus()
 	if err != nil {
 		beego.Error(err)

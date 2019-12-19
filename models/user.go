@@ -24,7 +24,7 @@ type User struct {
 
 func (u *User) Valid(v *validation.Validation) {
 	if u.Password != u.Repassword {
-		v.SetError("Repassword", "Passwords do not match")
+		_ = v.SetError("Repassword", "Passwords do not match")
 	}
 }
 
