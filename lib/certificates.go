@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-
+	"path/filepath"
 	"github.com/astaxie/beego"
 )
 
@@ -95,7 +95,7 @@ func trim(s string) string {
 
 func CreateCertificate(name string) error {
 	rsaPath := beego.AppConfig.String("EasyRsaPath")
-	varsPath := state.GlobalCfg.OVConfigPath + "keys/vars"
+	varsPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys/vars")
 	cmd := exec.Command("/bin/bash", "-c",
 		fmt.Sprintf(
 			"source %s &&"+
