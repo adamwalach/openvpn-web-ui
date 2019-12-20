@@ -14,6 +14,7 @@ import (
 	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"io/ioutil"
 )
 
 type NewCertParams struct {
@@ -22,7 +23,7 @@ type NewCertParams struct {
 
 type CertificatesController struct {
 	BaseController
- ConfigDir string
+	ConfigDir string
 }
 
 func (c *CertificatesController) NestPrepare() {
@@ -38,22 +39,23 @@ func (c *CertificatesController) NestPrepare() {
 // @router /certificates/:key [get]
 func (c *CertificatesController) Download() {
 	name := c.GetString(":key")
-	filename := fmt.Sprintf("%s.zip", name)
+	filename := fmt.Sprintf("%s.ovpn", name)
 
-	c.Ctx.Output.Header("Content-Type", "application/zip")
+	c.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	c.Ctx.Output.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	zw := zip.NewWriter(c.Controller.Ctx.ResponseWriter)
-
 	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys")
-	if cfgPath, err := c.saveClientConfig(name); err == nil {
-		_ = addFileToZip(zw, cfgPath)
+	cfgPath, err := c.saveClientConfig(keysPath, name)
+	if err == nil {
+		beego.Error(err)
+		return
 	}
-	_ = addFileToZip(zw, filepath.Join(keysPath, "ca.crt"))
-	_ = addFileToZip(zw, filepath.Join(keysPath, name+".crt"))
-	_ = addFileToZip(zw, filepath.Join(keysPath, name+".key"))
-
-	if err := zw.Close(); err != nil {
+	data, err := ioutil.ReadFile(cfgPath)
+	if err == nil {
+		beego.Error(err)
+		return
+	}
+	if _, err = c.Controller.Ctx.ResponseWriter.Write(data); err == nil {
 		beego.Error(err)
 	}
 }
@@ -137,11 +139,24 @@ func validateCertParams(cert NewCertParams) map[string]map[string]string {
 	return nil
 }
 
-func (c *CertificatesController) saveClientConfig(name string) (string, error) {
+func (c *CertificatesController) saveClientConfig(keysPath string, name string) (string, error) {
 	cfg := config.New()
 	cfg.ServerAddress = state.GlobalCfg.ServerAddress
-	cfg.Cert = name + ".crt"
-	cfg.Key = name + ".key"
+	ca, err := ioutil.ReadFile(filepath.Join(keysPath, "ca.crt"))
+	if err != nil {
+		return "", err
+	}
+	cfg.Ca = string(ca)
+	cert, err := ioutil.ReadFile(filepath.Join(keysPath, name+".crt"))
+	if err != nil {
+		return "", err
+	}
+	cfg.Cert = string(cert)
+	key, err := ioutil.ReadFile(filepath.Join(keysPath, name+".key"))
+	if err != nil {
+		return "", err
+	}
+	cfg.Key = string(key)
 	serverConfig := models.OVConfig{Profile: "default"}
 	_ = serverConfig.Read("Profile")
 	cfg.Port = serverConfig.Port
@@ -150,9 +165,8 @@ func (c *CertificatesController) saveClientConfig(name string) (string, error) {
 	cfg.Cipher = serverConfig.Cipher
 	cfg.Keysize = serverConfig.Keysize
 
-	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys", name + ".conf")
-	if err := config.SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"),
-		cfg, destPath); err != nil {
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys", name+".ovpn")
+	if err := config.SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"), cfg, destPath); err != nil {
 		beego.Error(err)
 		return "", err
 	}
