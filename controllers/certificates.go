@@ -1,20 +1,15 @@
 package controllers
 
 import (
-	"archive/zip"
 	"fmt"
-	"github.com/adamwalach/openvpn-web-ui/state"
-	"io"
-	"os"
-	"path/filepath"
-	"time"
-
 	"github.com/adamwalach/go-openvpn/client/config"
 	"github.com/adamwalach/openvpn-web-ui/lib"
 	"github.com/adamwalach/openvpn-web-ui/models"
+	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
 	"io/ioutil"
+	"path/filepath"
 )
 
 type NewCertParams struct {
@@ -46,44 +41,18 @@ func (c *CertificatesController) Download() {
 
 	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys")
 	cfgPath, err := c.saveClientConfig(keysPath, name)
-	if err == nil {
+	if err != nil {
 		beego.Error(err)
 		return
 	}
 	data, err := ioutil.ReadFile(cfgPath)
-	if err == nil {
+	if err != nil {
 		beego.Error(err)
 		return
 	}
-	if _, err = c.Controller.Ctx.ResponseWriter.Write(data); err == nil {
+	if _, err = c.Controller.Ctx.ResponseWriter.Write(data); err != nil {
 		beego.Error(err)
 	}
-}
-
-func addFileToZip(zw *zip.Writer, path string) error {
-	header := &zip.FileHeader{
-		Name:     filepath.Base(path),
-		Method:   zip.Store,
-		Modified: time.Now(),
-	}
-	fi, err := os.Open(path)
-	if err != nil {
-		beego.Error(err)
-		return err
-	}
-
-	fw, err := zw.CreateHeader(header)
-	if err != nil {
-		beego.Error(err)
-		return err
-	}
-
-	if _, err = io.Copy(fw, fi); err != nil {
-		beego.Error(err)
-		return err
-	}
-
-	return fi.Close()
 }
 
 // @router /certificates [get]
