@@ -22,6 +22,7 @@ type NewCertParams struct {
 
 type CertificatesController struct {
 	BaseController
+ ConfigDir string
 }
 
 func (c *CertificatesController) NestPrepare() {
@@ -44,13 +45,13 @@ func (c *CertificatesController) Download() {
 
 	zw := zip.NewWriter(c.Controller.Ctx.ResponseWriter)
 
-	keysPath := state.GlobalCfg.OVConfigPath + "keys/"
-	if cfgPath, err := saveClientConfig(name); err == nil {
+	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys")
+	if cfgPath, err := c.saveClientConfig(name); err == nil {
 		_ = addFileToZip(zw, cfgPath)
 	}
-	_ = addFileToZip(zw, keysPath+"ca.crt")
-	_ = addFileToZip(zw, keysPath+name+".crt")
-	_ = addFileToZip(zw, keysPath+name+".key")
+	_ = addFileToZip(zw, filepath.Join(keysPath, "ca.crt"))
+	_ = addFileToZip(zw, filepath.Join(keysPath, name+".crt"))
+	_ = addFileToZip(zw, filepath.Join(keysPath, name+".key"))
 
 	if err := zw.Close(); err != nil {
 		beego.Error(err)
@@ -90,7 +91,7 @@ func (c *CertificatesController) Get() {
 }
 
 func (c *CertificatesController) showCerts() {
-	path := state.GlobalCfg.OVConfigPath + "keys/index.txt"
+	path := filepath.Join(state.GlobalCfg.OVConfigPath, "keys/index.txt")
 	certs, err := lib.ReadCerts(path)
 	if err != nil {
 		beego.Error(err)
@@ -136,7 +137,7 @@ func validateCertParams(cert NewCertParams) map[string]map[string]string {
 	return nil
 }
 
-func saveClientConfig(name string) (string, error) {
+func (c *CertificatesController) saveClientConfig(name string) (string, error) {
 	cfg := config.New()
 	cfg.ServerAddress = state.GlobalCfg.ServerAddress
 	cfg.Cert = name + ".crt"
@@ -149,8 +150,8 @@ func saveClientConfig(name string) (string, error) {
 	cfg.Cipher = serverConfig.Cipher
 	cfg.Keysize = serverConfig.Keysize
 
-	destPath := state.GlobalCfg.OVConfigPath + "keys/" + name + ".conf"
-	if err := config.SaveToFile("conf/openvpn-client-config.tpl",
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys", name + ".conf")
+	if err := config.SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"),
 		cfg, destPath); err != nil {
 		beego.Error(err)
 		return "", err

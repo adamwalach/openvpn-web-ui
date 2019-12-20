@@ -34,7 +34,7 @@ func main() {
 
 	state.GlobalCfg = *defaultSettings
 
-	routers.Init()
+	routers.Init(*configDir)
 
 	lib.AddFuncMaps()
 	beego.Run()

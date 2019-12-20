@@ -12,7 +12,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-func Init() {
+func Init(configDir string) {
 	beego.SetStaticPath("/swagger", "swagger")
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/login", &controllers.LoginController{}, "get,post:Login")
@@ -22,7 +22,7 @@ func Init() {
 	beego.Router("/ov/config", &controllers.OVConfigController{})
 	beego.Router("/logs", &controllers.LogsController{})
 
-	beego.Include(&controllers.CertificatesController{})
+	beego.Include(&controllers.CertificatesController{ConfigDir: configDir})
 
 	ns := beego.NewNamespace("/api/v1",
 		beego.NSNamespace("/session",
