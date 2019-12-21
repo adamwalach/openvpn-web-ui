@@ -95,9 +95,9 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 			Management:          fmt.Sprintf("%s %s", address, network),
 			MaxClients:          100,
 			Server:              "10.8.0.0 255.255.255.0",
-			Ca:                  "keys/ca.crt",
-			Cert:                "keys/server.crt",
-			Key:                 "keys/server.key",
+			Ca:                  filepath.Join(ovConfigPath, "keys/ca.crt"),
+			Cert:                filepath.Join(ovConfigPath, "keys/server.crt"),
+			Key:                 filepath.Join(ovConfigPath, "keys/server.key"),
 		},
 	}
 	o := orm.NewOrm()

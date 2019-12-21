@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/adamwalach/openvpn-web-ui/state"
 	"html/template"
+	"path/filepath"
 
 	"github.com/adamwalach/go-openvpn/server/config"
 	mi "github.com/adamwalach/go-openvpn/server/mi"
@@ -14,6 +15,7 @@ import (
 
 type OVConfigController struct {
 	BaseController
+	ConfigDir string
 }
 
 func (c *OVConfigController) NestPrepare() {
@@ -49,8 +51,8 @@ func (c *OVConfigController) Post() {
 	lib.Dump(cfg)
 	c.Data["Settings"] = &cfg
 
-	destPath := state.GlobalCfg.OVConfigPath + "/server.conf"
-	err := config.SaveToFile("conf/openvpn-server-config.tpl", cfg.Config, destPath)
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "server.conf")
+	err := config.SaveToFile(filepath.Join(c.ConfigDir, "openvpn-server-config.tpl"), cfg.Config, destPath)
 	if err != nil {
 		beego.Warning(err)
 		flash.Error(err.Error())
