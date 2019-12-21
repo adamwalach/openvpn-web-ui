@@ -89,7 +89,7 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 			Cipher:              "AES-256-CBC",
 			Keysize:             256,
 			Auth:                "SHA256",
-			Dh:                  "dh2048.pem",
+			Dh:                  filepath.Join(ovConfigPath, "dh2048.pem"),
 			Keepalive:           "10 120",
 			IfconfigPoolPersist: "ipp.txt",
 			Management:          fmt.Sprintf("%s %s", address, network),
