@@ -7,6 +7,7 @@ require (
 	github.com/cloudfoundry/gosigar v0.0.0-20160602191207-c32d31af94b0
 	github.com/go-ldap/ldap/v3 v3.1.5
 	github.com/mattn/go-sqlite3 v1.2.1-0.20161215041557-2d44decb4941
+	github.com/stretchr/testify v1.4.0
 	golang.org/x/crypto v0.0.0-20170209233901-453249f01cfe
 	golang.org/x/net v0.0.0-20161215194249-45e771701b81
 	golang.org/x/sys v0.0.0-20160429193239-b776ec39b3e5

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/adamwalach/go-openvpn/client/config"
 	"github.com/adamwalach/openvpn-web-ui/lib"
@@ -10,6 +11,7 @@ import (
 	"github.com/astaxie/beego/validation"
 	"io/ioutil"
 	"path/filepath"
+	"text/template"
 )
 
 type NewCertParams struct {
@@ -135,10 +137,38 @@ func (c *CertificatesController) saveClientConfig(keysPath string, name string) 
 	cfg.Keysize = serverConfig.Keysize
 
 	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys", name+".ovpn")
-	if err := config.SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"), cfg, destPath); err != nil {
+	if err := SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"), cfg, destPath); err != nil {
 		beego.Error(err)
 		return "", err
 	}
 
 	return destPath, nil
+}
+
+func GetText(tpl string, c config.Config) (string, error) {
+	t := template.New("config")
+	t, err := t.Parse(tpl)
+	if err != nil {
+		return "", err
+	}
+	buf := new(bytes.Buffer)
+	err = t.Execute(buf, c)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func SaveToFile(tplPath string, c config.Config, destPath string) error {
+	tpl, err := ioutil.ReadFile(tplPath)
+	if err != nil {
+		return err
+	}
+
+	str, err := GetText(string(tpl), c)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(destPath, []byte(str), 0644)
 }
