@@ -1,5 +1,17 @@
 # OpenVPN-web-ui
 
+
+## Changes
+
+Modifications allowing to:
+- use on ARMv8
+- bandwidth consumed (didn't work on original code)
+- integration with current OpenVPN version (use docker-openvpn repo)
+- default pass to different - static in "models/model.go "OhLaVache2020"
+
+Credits for software go to original author - mine is just little port to ARMv8.
+
+
 ## Summary
 OpenVPN server web administration interface.
 

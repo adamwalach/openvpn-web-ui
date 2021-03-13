@@ -1,80 +1,74 @@
-# easy-rsa parameter settings
+# Easy-RSA 3 parameter settings
 
-# NOTE: If you installed from an RPM,
-# don't edit this file in place in
-# /usr/share/openvpn/easy-rsa --
-# instead, you should copy the whole
-# easy-rsa directory to another location
-# (such as /etc/openvpn) so that your
-# edits will not be wiped out by a future
-# OpenVPN package upgrade.
-
-# This variable should point to
-# the top level of the easy-rsa
-# tree.
-export EASY_RSA="/usr/share/easy-rsa"
-
+# HOW TO USE THIS FILE
 #
-# This variable should point to
-# the requested executables
+# vars.example contains built-in examples to Easy-RSA settings. You MUST name
+# this file 'vars' if you want it to be used as a configuration file. If you do
+# not, it WILL NOT be automatically read when you call easyrsa commands.
 #
-export OPENSSL="openssl"
-export PKCS11TOOL="pkcs11-tool"
-export GREP="grep"
-
-
-# This variable should point to
-# the openssl.cnf file included
-# with easy-rsa.
-export KEY_CONFIG=`$EASY_RSA/whichopensslcnf $EASY_RSA`
-
-# Edit this variable to point to
-# your soon-to-be-created key
-# directory.
+# It is not necessary to use this config file unless you wish to change
+# operational defaults. These defaults should be fine for many uses without the
+# need to copy and edit the 'vars' file.
 #
-# WARNING: clean-all will do
-# a rm -rf on this directory
-# so make sure you define
-# it correctly!
-export KEY_DIR="/etc/openvpn/keys"
+# All of the editable settings are shown commented and start with the command
+# 'set_var' -- this means any set_var command that is uncommented has been
+# modified by the user. If you're happy with a default, there is no need to
+# define the value to its default.
 
-# Issue rm -rf warning
-echo NOTE: If you run ./clean-all, I will be doing a rm -rf on $KEY_DIR
+# A little housekeeping: DON'T EDIT THIS SECTION
+# 
+# Easy-RSA 3.x doesn't source into the environment directly.
+# Complain if a user tries to do this:
+if [ -z "$EASYRSA_CALLER" ]; then
+	echo "You appear to be sourcing an Easy-RSA 'vars' file." >&2
+	echo "This is no longer necessary and is disallowed. See the section called" >&2
+	echo "'How to use this file' near the top comments for more details." >&2
+	return 1
+fi
 
-# PKCS11 fixes
-export PKCS11_MODULE_PATH="dummy"
-export PKCS11_PIN="dummy"
+# DO YOUR EDITS BELOW THIS POINT
 
-# Increase this to 2048 if you
-# are paranoid.  This will slow
-# down TLS negotiation performance
-# as well as the one-time DH parms
-# generation process.
-export KEY_SIZE=2048
+#set_var EASYRSA	"${0%/*}"
+#set_var EASYRSA_OPENSSL	"openssl"
+#set_var EASYRSA_PKI		"$PWD/pki"
+set_var EASYRSA_PKI	"/etc/openvpn/pki"
 
-# In how many days should the root CA key expire?
-export CA_EXPIRE=3650
+# Update as required
+set_var EASYRSA_REQ_COUNTRY	"FR"
+set_var EASYRSA_REQ_PROVINCE	"Soleil"
+set_var EASYRSA_REQ_CITY	"Mer"
+set_var EASYRSA_REQ_ORG		"Private"
+set_var EASYRSA_REQ_EMAIL	"call@me.out"
+set_var EASYRSA_REQ_OU		"Yours"
 
-# In how many days should certificates expire?
-export KEY_EXPIRE=3650
+set_var EASYRSA_KEY_SIZE	4096
 
-# These are the default values for fields
-# which will be placed in the certificate.
-# Don't leave any of these fields blank.
-export KEY_COUNTRY="US"
-export KEY_PROVINCE="NY"
-export KEY_CITY="New York"
-export KEY_ORG="dummy"
-export KEY_EMAIL="demo@example.com"
-export KEY_OU="IT"
+# The default crypto mode is rsa; ec can enable elliptic curve support.
+# Note that not all software supports ECC, so use care when enabling it.
+# Choices for crypto alg are: (each in lower-case)
+#  * rsa
+#  * ec
 
-# X509 Subject Field
-export KEY_NAME="iXa-CA"
+#set_var EASYRSA_ALGO		rsa
 
-# PKCS11 Smart Card
-# export PKCS11_MODULE_PATH="/usr/lib/changeme.so"
-# export PKCS11_PIN=1234
+# Define the named curve, used in ec mode only:
 
-# If you'd like to sign all keys with the same Common Name, uncomment the KEY_CN export below
-# You will also need to make sure your OpenVPN server config has the duplicate-cn option set
-# export KEY_CN="CommonName"
+#set_var EASYRSA_CURVE		secp384r1
+
+set_var EASYRSA_CA_EXPIRE	7200
+set_var EASYRSA_CERT_EXPIRE	7200
+
+set_var EASYRSA_CERT_RENEW	120
+
+set_var EASYRSA_CRL_DAYS	180
+
+#set_var EASYRSA_NS_SUPPORT	"no"
+#set_var EASYRSA_NS_COMMENT	"Easy-RSA Generated Certificate"
+
+# Experimental
+#set_var EASYRSA_TEMP_FILE	"$EASYRSA_PKI/extensions.temp"
+set_var EASYRSA_DIGEST		"sha512"
+
+set_var EASYRSA_REQ_CN          "yours.domain.and.not.dkadds2.domain"
+
+#set_var EASYRSA_BATCH		"true"
