@@ -1,25 +1,35 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 CA_NAME=LocalCA
-SERVER_NAME=server
 EASY_RSA=/usr/share/easy-rsa
+OD=$PWD
+export EASYRSA_BATCH="true"
 
-mkdir -p /etc/openvpn/keys
-touch /etc/openvpn/keys/index.txt
-echo 01 > /etc/openvpn/keys/serial
-cp -f /opt/scripts/vars.template /etc/openvpn/keys/vars
+dd if=/dev/urandom of=/etc/openvpn/pki/.rnd bs=256 count=1
 
-$EASY_RSA/clean-all
-source /etc/openvpn/keys/vars
+cd $OVDIR
+
 export KEY_NAME=$CA_NAME
 echo "Generating CA cert"
+$EASY_RSA/easyrsa init-pki
+cp -f /opt/scripts/vars.template $OVDIR/pki/vars 
+dd if=/dev/urandom of=/etc/openvpn/pki/.rnd bs=256 count=1 > /dev/null 2>&1
+
+$EASY_RSA/easyrsa build-ca nopass
+
+# only temporarily for tests as it takes ages... use existing one
+
+# $EASY_RSA/easyrsa gen-dh
+
 #$EASY_RSA/build-ca
-export EASY_RSA="${EASY_RSA:-.}"
+#export EASY_RSA="${EASY_RSA:-.}"
 
-$EASY_RSA/pkitool --initca $*
+# build server key
+echo "Generating server cert $SERVER_FQDN"
+export KEY_NAME=$SERVER_FQDN
+$EASY_RSA/easyrsa build-server-full $SERVER_FQDN nopass
 
-export KEY_NAME=$SERVER_NAME
+$EASY_RSA/easyrsa gen-crl
 
-echo "Generating server cert"
-#$EASY_RSA/build-key-server $SERVER_NAME
-$EASY_RSA/pkitool --server $SERVER_NAME
+echo "Missing is still ta.key"
+echo "openvpn --genkey --secret /root/easy-rsa-example/pki/ta.key"

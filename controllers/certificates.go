@@ -90,7 +90,7 @@ func (c *CertificatesController) Get() {
 }
 
 func (c *CertificatesController) showCerts() {
-	path := models.GlobalCfg.OVConfigPath + "keys/index.txt"
+	path := models.GlobalCfg.OVConfigPath + "pki/index.txt"
 	certs, err := lib.ReadCerts(path)
 	if err != nil {
 		beego.Error(err)
