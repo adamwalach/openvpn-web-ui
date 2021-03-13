@@ -48,7 +48,7 @@ func initDB() {
 }
 
 func createDefaultUsers() {
-	hash, err := passlib.Hash("OhLaCache2020")
+	hash, err := passlib.Hash("OhLaVache2020")
 	if err != nil {
 		beego.Error("Unable to hash password", err)
 	}
