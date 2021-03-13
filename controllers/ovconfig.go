@@ -48,7 +48,7 @@ func (c *OVConfigController) Post() {
 	lib.Dump(cfg)
 	c.Data["Settings"] = &cfg
 
-	destPath := models.GlobalCfg.OVConfigPath + "/server.conf"
+	destPath := models.GlobalCfg.OVConfigPath + "/openvpn.conf"
 	err := config.SaveToFile("conf/openvpn-server-config.tpl", cfg.Config, destPath)
 	if err != nil {
 		beego.Warning(err)

@@ -88,17 +88,17 @@ func ParseStatus(input string) (*Status, error) {
 			}
 			s.RoutingTable = append(s.RoutingTable, item)
 		case c == "CLIENT_LIST":
-			bytesR, _ := strconv.ParseUint(fields[4], 10, 64)
-			bytesS, _ := strconv.ParseUint(fields[5], 10, 64)
+			bytesR, _ := strconv.ParseUint(fields[5], 10, 64)
+			bytesS, _ := strconv.ParseUint(fields[6], 10, 64)
 			item := &OVClient{
 				CommonName:      fields[1],
 				RealAddress:     fields[2],
 				VirtualAddress:  fields[3],
 				BytesReceived:   bytesR,
 				BytesSent:       bytesS,
-				ConnectedSince:  fields[6],
-				ConnectedSinceT: fields[7],
-				Username:        fields[8],
+				ConnectedSince:  fields[7],
+				ConnectedSinceT: fields[8],
+				Username:        fields[9],
 			}
 			s.ClientList = append(s.ClientList, item)
 		}

@@ -48,7 +48,7 @@ func initDB() {
 }
 
 func createDefaultUsers() {
-	hash, err := passlib.Hash("b3secure")
+	hash, err := passlib.Hash("OhLaVache2020")
 	if err != nil {
 		beego.Error("Unable to hash password", err)
 	}
@@ -107,9 +107,9 @@ func createDefaultOVConfig() {
 			Management:          "0.0.0.0 2080",
 			MaxClients:          100,
 			Server:              "10.8.0.0 255.255.255.0",
-			Ca:                  "keys/ca.crt",
-			Cert:                "keys/server.crt",
-			Key:                 "keys/server.key",
+			Ca:                  "pki/ca.crt",
+			Cert:                "pki/server.crt",
+			Key:                 "pki/server.key",
 		},
 	}
 	o := orm.NewOrm()
@@ -119,9 +119,9 @@ func createDefaultOVConfig() {
 		} else {
 			beego.Debug(c)
 		}
-		path := GlobalCfg.OVConfigPath + "/server.conf"
+		path := GlobalCfg.OVConfigPath + "/openvpn.conf"
 		if _, err = os.Stat(path); os.IsNotExist(err) {
-			destPath := GlobalCfg.OVConfigPath + "/server.conf"
+			destPath := GlobalCfg.OVConfigPath + "/openvpn.conf"
 			if err = config.SaveToFile("conf/openvpn-server-config.tpl",
 				c.Config, destPath); err != nil {
 				beego.Error(err)
