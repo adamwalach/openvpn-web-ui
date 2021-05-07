@@ -35,6 +35,20 @@
       </div>
 
       <div class="form-group">
+        <label for="name">DNSServerOne</label>
+        <input type="text" class="form-control" name="DNSServerOne" id="DNSServerOne" placeholder="Enter the first DNS server"
+          value="{{ .Settings.DNSServerOne }}">
+        <span class="help-block">Enter the first DNS server</span>
+      </div>
+
+      <div class="form-group">
+        <label for="name">DNSServerTwo</label>
+        <input type="text" class="form-control" name="DNSServerTwo" id="DNSServerTwo" placeholder="Enter the second DNS server"
+          value="{{ .Settings.DNSServerTwo }}">
+        <span class="help-block">Enter the second DNS server</span>
+      </div>
+
+      <div class="form-group">
         <label for="name">CA cert</label>
         <input type="text" class="form-control" name="Ca" id="Ca" placeholder="Enter CA certificate path"
           value="{{ .Settings.Ca }}">
@@ -121,6 +135,20 @@
           value="{{ .Settings.MaxClients }}">
         <span id="helpBlock" class="help-block">The maximum number of concurrently connected
             clients we want to allow.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="name">ExtraServerOptions</label>
+        <textarea type="text" class="form-control" name="ExtraServerOptions" 
+          id="ExtraServerOptions">{{ .Settings.ExtraServerOptions }}</textarea>
+        <span id="helpBlock" class="help-block">Extra server options to add to the config.</span>
+      </div>
+
+      <div class="form-group">
+        <label for="name">ExtraClientOptions</label>
+        <textarea type="text" class="form-control" name="ExtraClientOptions" 
+          id="ExtraClientOptions">{{ .Settings.ExtraClientOptions }}</textarea>
+        <span id="helpBlock" class="help-block">Extra client options to add to the generated client configs.</span>
       </div>
 
       <div class="form-group">

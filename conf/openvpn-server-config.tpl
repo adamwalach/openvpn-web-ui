@@ -17,8 +17,8 @@ dh {{ .Dh }}
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist {{ .IfconfigPoolPersist }}
 push "route 10.8.0.0 255.255.255.0"
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
+push "dhcp-option DNS {{ .DNSServerOne }}"
+push "dhcp-option DNS {{ .DNSServerTwo }}"
 
 keepalive {{ .Keepalive }}
 
@@ -32,3 +32,5 @@ log         openvpn.log
 verb 3
 
 mute 10
+
+{{ .ExtraServerOptions }}
