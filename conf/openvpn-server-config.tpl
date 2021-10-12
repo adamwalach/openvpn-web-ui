@@ -14,9 +14,9 @@ keysize {{ .Keysize }}
 auth {{ .Auth }}
 dh {{ .Dh }}
 
-server 10.8.0.0 255.255.255.0
+server 10.0.70.0 255.255.255.0
 ifconfig-pool-persist {{ .IfconfigPoolPersist }}
-push "route 10.8.0.0 255.255.255.0"
+push "route 10.0.60.0 255.255.255.0"
 push "dhcp-option DNS 8.8.8.8"
 push "dhcp-option DNS 8.8.4.4"
 

@@ -37,7 +37,7 @@ func InitDB() {
 }
 
 func CreateDefaultUsers() {
-	hash, err := passlib.Hash("b3secure")
+	hash, err := passlib.Hash("Antosha6")
 	if err != nil {
 		beego.Error("Unable to hash password", err)
 	}
@@ -89,15 +89,15 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 			Cipher:              "AES-256-CBC",
 			Keysize:             256,
 			Auth:                "SHA256",
-			Dh:                  filepath.Join(ovConfigPath, "dh2048.pem"),
+			Dh:                  filepath.Join(ovConfigPath, "pki/dh.pem"),
 			Keepalive:           "10 120",
-			IfconfigPoolPersist: "ipp.txt",
+			IfconfigPoolPersist: "pki/ipp.txt",
 			Management:          fmt.Sprintf("%s %s", address, network),
 			MaxClients:          100,
-			Server:              "10.8.0.0 255.255.255.0",
-			Ca:                  filepath.Join(ovConfigPath, "keys/ca.crt"),
-			Cert:                filepath.Join(ovConfigPath, "keys/server.crt"),
-			Key:                 filepath.Join(ovConfigPath, "keys/server.key"),
+			Server:              "10.0.60.0 255.255.255.0",
+			Ca:                  filepath.Join(ovConfigPath, "pki/ca.crt"),
+			Cert:                filepath.Join(ovConfigPath, "pki/issued/server.crt"),
+			Key:                 filepath.Join(ovConfigPath, "pki/private/server.key"),
 		},
 	}
 	o := orm.NewOrm()
@@ -107,7 +107,7 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 		} else {
 			beego.Debug(c)
 		}
-		serverConfig := filepath.Join(ovConfigPath, "server.conf")
+		serverConfig := filepath.Join(ovConfigPath, "config/server.conf")
 		if _, err = os.Stat(serverConfig); os.IsNotExist(err) {
 			if err = config.SaveToFile(filepath.Join(configDir, "openvpn-server-config.tpl"), c.Config, serverConfig); err != nil {
 				beego.Error(err)

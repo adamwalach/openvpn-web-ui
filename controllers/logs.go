@@ -34,7 +34,7 @@ func (c *LogsController) Get() {
 		return
 	}
 
-	fName := settings.OVConfigPath + "/openvpn.log"
+	fName := settings.OVConfigPath + "/log/openvpn.log"
 	file, err := os.Open(fName)
 	if err != nil {
 		beego.Error(err)

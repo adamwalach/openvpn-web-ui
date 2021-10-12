@@ -41,7 +41,8 @@ func (c *CertificatesController) Download() {
 	c.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	c.Ctx.Output.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys")
+	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "pki")
+
 	cfgPath, err := c.saveClientConfig(keysPath, name)
 	if err != nil {
 		beego.Error(err)
@@ -64,7 +65,7 @@ func (c *CertificatesController) Get() {
 }
 
 func (c *CertificatesController) showCerts() {
-	path := filepath.Join(state.GlobalCfg.OVConfigPath, "keys/index.txt")
+	path := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/index.txt")
 	certs, err := lib.ReadCerts(path)
 	if err != nil {
 		beego.Error(err)
@@ -112,8 +113,9 @@ func validateCertParams(cert NewCertParams) map[string]map[string]string {
 
 func (c *CertificatesController) saveClientConfig(keysPath string, name string) (string, error) {
 	cfg := config.New()
+        keysPathCa := filepath.Join(state.GlobalCfg.OVConfigPath, "pki")
 	cfg.ServerAddress = state.GlobalCfg.ServerAddress
-	ca, err := ioutil.ReadFile(filepath.Join(keysPath, "ca.crt"))
+	ca, err := ioutil.ReadFile(filepath.Join(keysPathCa, "ca.crt"))
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +125,8 @@ func (c *CertificatesController) saveClientConfig(keysPath string, name string) 
 		return "", err
 	}
 	cfg.Cert = string(cert)
-	key, err := ioutil.ReadFile(filepath.Join(keysPath, name+".key"))
+        keysPathKey := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/private")
+	key, err := ioutil.ReadFile(filepath.Join(keysPathKey, name+".key"))
 	if err != nil {
 		return "", err
 	}
@@ -136,7 +139,7 @@ func (c *CertificatesController) saveClientConfig(keysPath string, name string) 
 	cfg.Cipher = serverConfig.Cipher
 	cfg.Keysize = serverConfig.Keysize
 
-	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "keys", name+".ovpn")
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/issued", name+".ovpn")
 	if err := SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"), cfg, destPath); err != nil {
 		beego.Error(err)
 		return "", err
