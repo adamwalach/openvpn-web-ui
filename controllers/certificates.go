@@ -41,7 +41,7 @@ func (c *CertificatesController) Download() {
 	c.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	c.Ctx.Output.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "pki")
+	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients")
 
 	cfgPath, err := c.saveClientConfig(keysPath, name)
 	if err != nil {
@@ -139,7 +139,7 @@ func (c *CertificatesController) saveClientConfig(keysPath string, name string) 
 	cfg.Cipher = serverConfig.Cipher
 	cfg.Keysize = serverConfig.Keysize
 
-	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/issued", name+".ovpn")
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients", name+".ovpn")
 	if err := SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"), cfg, destPath); err != nil {
 		beego.Error(err)
 		return "", err
