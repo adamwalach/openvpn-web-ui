@@ -4,7 +4,7 @@ import (
 	"github.com/adamwalach/openvpn-web-ui/lib"
 	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
-
+        "fmt"
 	mi "github.com/adamwalach/go-openvpn/server/mi"
 )
 
@@ -29,6 +29,8 @@ func (c *MainController) Get() {
 	status, err := client.GetStatus()
 	if err != nil {
 		beego.Error(err)
+                beego.Warn(fmt.Sprintf("passed client line: %s", client))
+                beego.Warn(fmt.Sprintf("error: %s", err))
 	} else {
 		c.Data["ovstatus"] = status
 	}

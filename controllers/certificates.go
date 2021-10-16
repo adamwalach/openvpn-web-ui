@@ -41,7 +41,7 @@ func (c *CertificatesController) Download() {
 	c.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	c.Ctx.Output.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients")
+	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/issued")
 
 	cfgPath, err := c.saveClientConfig(keysPath, name)
 	if err != nil {

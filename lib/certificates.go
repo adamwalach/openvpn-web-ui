@@ -97,7 +97,8 @@ func CreateCertificate(name string) error {
 	cmd := exec.Command("/bin/bash", "-c",
 		fmt.Sprintf(
                         "cd /opt/scripts/ && "+
-                                 "./genclient.sh %s", name))
+                        "export KEY_NAME=%s &&"+
+                                 "./genclient.sh %s", name, name))
 	cmd.Dir = state.GlobalCfg.OVConfigPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {
