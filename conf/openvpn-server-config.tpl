@@ -1,4 +1,4 @@
-management {{ .Management }}
+management 0.0.0.0 2080
 
 port {{ .Port }}
 proto {{ .Proto }}

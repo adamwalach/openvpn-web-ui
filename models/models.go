@@ -94,7 +94,7 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 			IfconfigPoolPersist: "pki/ipp.txt",
 			Management:          fmt.Sprintf("%s %s", address, network),
 			MaxClients:          100,
-			Server:              "10.0.60.0 255.255.255.0",
+			Server:              "10.0.70.0 255.255.255.0",
 			Ca:                  "pki/ca.crt",
 			Cert:                "pki/issued/server.crt",
 			Key:                 "pki/private/server.key",
