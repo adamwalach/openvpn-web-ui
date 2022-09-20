@@ -1,3 +1,4 @@
 /data.db
 /openvpn-web-ui*
 /lastupdate.tmp
+.DS_Store
