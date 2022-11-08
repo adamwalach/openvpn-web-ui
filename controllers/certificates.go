@@ -3,15 +3,16 @@ package controllers
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"text/template"
+
 	"github.com/adamwalach/go-openvpn/client/config"
 	"github.com/adamwalach/openvpn-web-ui/lib"
 	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
-	"io/ioutil"
-	"path/filepath"
-	"text/template"
 )
 
 type NewCertParams struct {
@@ -98,6 +99,14 @@ func (c *CertificatesController) Post() {
 	c.showCerts()
 }
 
+// @router /certificates/revoke/:key [get]
+func (c *CertificatesController) Revoke() {
+	name := c.GetString(":key")
+	lib.RevokeCertificate(name)
+	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
+	return
+}
+
 func validateCertParams(cert NewCertParams) map[string]map[string]string {
 	valid := validation.Validation{}
 	b, err := valid.Valid(&cert)
@@ -113,7 +122,7 @@ func validateCertParams(cert NewCertParams) map[string]map[string]string {
 
 func (c *CertificatesController) saveClientConfig(keysPath string, name string) (string, error) {
 	cfg := config.New()
-        keysPathCa := filepath.Join(state.GlobalCfg.OVConfigPath, "pki")
+	keysPathCa := filepath.Join(state.GlobalCfg.OVConfigPath, "pki")
 	cfg.ServerAddress = state.GlobalCfg.ServerAddress
 	ca, err := ioutil.ReadFile(filepath.Join(keysPathCa, "ca.crt"))
 	if err != nil {
@@ -125,7 +134,7 @@ func (c *CertificatesController) saveClientConfig(keysPath string, name string) 
 		return "", err
 	}
 	cfg.Cert = string(cert)
-        keysPathKey := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/private")
+	keysPathKey := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/private")
 	key, err := ioutil.ReadFile(filepath.Join(keysPathKey, name+".key"))
 	if err != nil {
 		return "", err

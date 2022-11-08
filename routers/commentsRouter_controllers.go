@@ -62,4 +62,11 @@ func init() {
 				AllowHTTPMethods: []string{"post"},
 				Params:           nil})
 
+	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] = append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
+		beego.ControllerComments{
+			Method:           "Revoke",
+			Router:           `/certificates/revoke/:key`,
+			AllowHTTPMethods: []string{"get"},
+			Params:           nil})
+
 }

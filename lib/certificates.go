@@ -2,17 +2,19 @@ package lib
 
 import (
 	"fmt"
-	"github.com/adamwalach/openvpn-web-ui/state"
 	"io/ioutil"
 	"os/exec"
 	"strings"
 	"time"
-//	"path/filepath"
+
+	"github.com/adamwalach/openvpn-web-ui/state"
+
+	//	"path/filepath"
 	"github.com/astaxie/beego"
 )
 
-//Cert
-//https://groups.google.com/d/msg/mailing.openssl.users/gMRbePiuwV0/wTASgPhuPzkJ
+// Cert
+// https://groups.google.com/d/msg/mailing.openssl.users/gMRbePiuwV0/wTASgPhuPzkJ
 type Cert struct {
 	EntryType   string
 	Expiration  string
@@ -96,9 +98,25 @@ func trim(s string) string {
 func CreateCertificate(name string) error {
 	cmd := exec.Command("/bin/bash", "-c",
 		fmt.Sprintf(
-                        "cd /opt/scripts/ && "+
-                        "export KEY_NAME=%s &&"+
-                                 "./genclient.sh %s", name, name))
+			"cd /opt/scripts/ && "+
+				"export KEY_NAME=%s &&"+
+				"./genclient.sh %s", name, name))
+	cmd.Dir = state.GlobalCfg.OVConfigPath
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		beego.Debug(string(output))
+		beego.Error(err)
+		return err
+	}
+	return nil
+}
+
+func RevokeCertificate(name string) error {
+	cmd := exec.Command("/bin/bash", "-c",
+		fmt.Sprintf(
+			"cd /opt/scripts/ && "+
+				"export KEY_NAME=%s &&"+
+				"./rmclient.sh %s", name, name))
 	cmd.Dir = state.GlobalCfg.OVConfigPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {

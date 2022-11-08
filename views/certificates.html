@@ -27,6 +27,7 @@
               <th>Revocation</th>
               <th>Serial</th>
               <th>Details</th>
+              <th>Revoke</th>
               <th></th>
             </tr>
             </thead>
@@ -52,6 +53,11 @@
                     <span class="label label-warning">Country: {{ .Details.Country }}</span>
                     <span class="label label-warning">CN: {{ .Details.CN }}</span>
                     <span class="label label-warning">Email: {{ .Details.Email }}</span>
+                  </td>
+                  <td>
+                    {{ if eq .Revocation ""}}
+                    <a href="{{urlfor "CertificatesController.Revoke" ":key" .Details.Name}}" class="btn btn-danger"><i class="fas fa-ban"></i></a>
+                    {{ end }}
                   </td>
               </tr>
               {{ end }}
