@@ -56,7 +56,7 @@
                   </td>
                   <td>
                     {{ if eq .Revocation ""}}
-                    <a href="{{urlfor "CertificatesController.Revoke" ":key" .Details.Name}}" class="btn btn-danger"><i class="fas fa-ban"></i></a>
+                    <a href="{{urlfor "CertificatesController.Revoke" ":key" .Details.Name}}" class="btn btn-danger" title="Revoke">X</a>
                     {{ end }}
                   </td>
               </tr>
@@ -105,6 +105,26 @@
     <div class="box-footer">
       <button type="submit" class="btn btn-primary">Create</button>
     </div>
-    </form>
-    </div>
+  </form>
+</div>
+
+<div class="box box-primary">
+  <div class="box-header with-border">
+    <h3 class="box-title">Kind reminder</h3>
+  </div>
+  <!-- /.box-header -->
+  <div class="box-body">
+    <span id="helpBlock" class="help-block">If you are revoking Certificate, don't forget to restart your OpenVPN container to make revocation take the effect.<br/></span>
+    <p style="font-family:courier;">&emsp;cd ~/openvpn && sudo docker-compose restart openvpn</p>
+  </div>
+  <div class="box-footer clearfix">
+  </div>
+  <!--
+  <div class="box-footer clearfix">
+    <a href="javascript:void(0)" class="btn btn-sm btn-info btn-flat pull-left">Place New Order</a>
+    <a href="javascript:void(0)" class="btn btn-sm btn-default btn-flat pull-right">View All Orders</a>
+  </div>
+-->
+  <!-- /.box-footer -->
+</div>
 {{end}}
