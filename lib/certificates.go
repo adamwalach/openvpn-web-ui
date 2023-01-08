@@ -126,3 +126,18 @@ func RevokeCertificate(name string) error {
 	}
 	return nil
 }
+
+func Restart() error {
+	cmd := exec.Command("/bin/bash", "-c",
+		fmt.Sprintf(
+			"cd /opt/scripts/ && "+
+				"./restart.sh %s"))
+	cmd.Dir = state.GlobalCfg.OVConfigPath
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		beego.Debug(string(output))
+		beego.Error(err)
+		return err
+	}
+	return nil
+}

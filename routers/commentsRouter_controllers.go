@@ -69,4 +69,10 @@ func init() {
 			AllowHTTPMethods: []string{"get"},
 			Params:           nil})
 
+	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] = append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
+		beego.ControllerComments{
+			Method:           "Restart",
+			Router:           `/certificates/restart`,
+			AllowHTTPMethods: []string{"get"},
+			Params:           nil})
 }
