@@ -116,8 +116,7 @@
   </div>
   <!-- /.box-header -->
   <div class="box-body">
-    <span id="helpBlock" class="help-block">If you are revoking Certificate, don't forget to restart your OpenVPN container to disconnect all active client sessions and make revocation take the effect.<br/></span>
-    <p style="font-family:courier;">&emsp;cd ~/openvpn && sudo docker-compose restart openvpn</p>
+    <span id="helpBlock" class="help-block">If you are revoking Certificate, don't forget to restart your OpenVPN container to disconnect all active client sessions and make revocation to take the effect.<br/>Restart will need up to 7 seconds of time.<br/></span>
   </div>
   <div class="box-footer">
     <a href="{{urlfor "CertificatesController.Restart"}}" class="btn btn-danger" title="Restart OpenVPN container">Restart</a>
