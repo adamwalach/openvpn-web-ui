@@ -19,9 +19,12 @@ It does include 2 different Docker containers:
 * log preview
 * modification of OpenVPN configuration file through web interface
 
+[Original Readme](./Original_README.md)
+
 ## Improvments
 * Added support for ARM32v7 and ARM64v8 architecture (Raspberry Pi)
 * Added support for Docker Compose
+* EasyRSA 3.X support
 * Added support for Admin user and password creation via environment variables
 * New feature for downloading generated clients certificate as .OVPN file via WEB UI
 * New feature for Certificates revocation via WEB UI
@@ -272,4 +275,4 @@ All the Server and Client configuration located in Docker volume and can be ease
 
 ## Дякую and Kudos to the original author
 
-Kudos to @adamwalach for development of original [OpenVPN-WEB-UI](https://github.com/adamwalach/openvpn-web-ui) interface of x86 computers which was ported for arm32v7 and arm64V8 with expanded functionality as part of this project.
+Kudos to @adamwalach for development of original [OpenVPN-WEB-UI](https://github.com/adamwalach/openvpn-web-ui) interface which was ported for arm32v7 and arm64V8 with expanded functionality as part of this project.
