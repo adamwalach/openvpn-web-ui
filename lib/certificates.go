@@ -103,7 +103,7 @@ func CreateCertificate(name string, staticip string) error {
 	if staticip != "" {
 		pass = true
 	}
-	if !pass {
+	if pass {
 		staticip = "not.defined"
 		cmd := exec.Command("/bin/bash", "-c",
 			fmt.Sprintf(
@@ -119,7 +119,7 @@ func CreateCertificate(name string, staticip string) error {
 		}
 		return nil
 	}
-	if pass {
+	if !pass {
 		cmd := exec.Command("/bin/bash", "-c",
 			fmt.Sprintf(
 				"cd /opt/scripts/ && "+
