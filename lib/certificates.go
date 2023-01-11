@@ -35,7 +35,7 @@ type Details struct {
 }
 
 func ReadCerts(path string) ([]*Cert, error) {
-	certs := make([]*Cert, 0, 0)
+	certs := make([]*Cert, 0)
 	text, err := ioutil.ReadFile(path)
 	if err != nil {
 		return certs, err
@@ -45,7 +45,7 @@ func ReadCerts(path string) ([]*Cert, error) {
 		fields := strings.Split(trim(line), "\t")
 		if len(fields) != 6 {
 			return certs,
-				fmt.Errorf("Incorrect number of lines in line: \n%s\n. Expected %d, found %d",
+				fmt.Errorf("incorrect number of lines in line: \n%s\n. Expected %d, found %d",
 					line, 6, len(fields))
 		}
 		expT, _ := time.Parse("060102150405Z", fields[1])
@@ -95,18 +95,41 @@ func trim(s string) string {
 	return strings.Trim(strings.Trim(s, "\r\n"), "\n")
 }
 
-func CreateCertificate(name string) error {
-	cmd := exec.Command("/bin/bash", "-c",
-		fmt.Sprintf(
-			"cd /opt/scripts/ && "+
-				"export KEY_NAME=%s &&"+
-				"./genclient.sh %s", name, name))
-	cmd.Dir = state.GlobalCfg.OVConfigPath
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		beego.Debug(string(output))
-		beego.Error(err)
-		return err
+func CreateCertificate(name string, staticip string) error {
+	pass := false
+	if staticip != "" {
+		pass = true
+	}
+	if !pass {
+		cmd := exec.Command("/bin/bash", "-c",
+			fmt.Sprintf(
+				"cd /opt/scripts/ && "+
+					"export KEY_NAME=%s &&"+
+					"./genclient.sh %s", name, name))
+		cmd.Dir = state.GlobalCfg.OVConfigPath
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			beego.Debug(string(output))
+			beego.Error(err)
+			return err
+		}
+		return nil
+	}
+	if pass {
+		cmd := exec.Command("/bin/bash", "-c",
+			fmt.Sprintf(
+				"cd /opt/scripts/ && "+
+					"export KEY_NAME=%s &&"+
+					"./genclient.sh %s &&"+
+					"echo 'ifconfig-push %s 255.255.255.0' > /etc/openvpn/staticclients/%s", name, name, staticip, name))
+		cmd.Dir = state.GlobalCfg.OVConfigPath
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			beego.Debug(string(output))
+			beego.Error(err)
+			return err
+		}
+		return nil
 	}
 	return nil
 }

@@ -96,10 +96,38 @@
   {{template "common/alert.html" .}}
   <form role="form" action="{{urlfor "CertificatesController.Post"}}" method="post">
     <div class="box-body">
-      <div class="form-group {{if field_error_exist .validation "Name" }}has-error{{end}}" >
-        <label for="name">Name</label>
-        <input type="text" class="form-control" id="Name" name="Name">
-      </div>
+      <table class="create-new-cert">
+        <thead>
+          <tr>
+            <th>
+              <label for="name">Name</label>
+            </th>
+            <th>
+              <label for="name">Client Static IP (Optional)</label>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="form-group {{if field_error_exist .validation "Name" }}has-error{{end}}">
+              <input type="text" class="form-control" placeholder="Enter name" id="Name" name="Name">
+            </td>
+            <td class="form-group">
+              <input type="text" class="form-control" placeholder="Enter Static IP" id="Staticip" name="Staticip">
+            </td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td class="form-group">
+              <span class="help-block">Name is used as the common name of the certificate.&nbsp;<span>
+            </td>
+            <td class="form-group">
+              <span class="help-block">Client Static IP is optional. Used as a local Client IP for subnet split.</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <span class="help-block"> {{template "common/fvalid.html" field_error_message .validation "Name" }}</span>
     </div>
     <!-- /.box-body -->
