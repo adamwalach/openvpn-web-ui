@@ -40,7 +40,8 @@ fi
 # Sign request
 ./easyrsa sign-req client "$1"
 # Fix for /name in index.txt
-sed -i'.bak' "$ s/$/\/name=${1}/" /usr/share/easy-rsa/pki/index.txt
+# backup  sed -i'.bak' "$ s/$/\/name=${1}/" /usr/share/easy-rsa/pki/index.txt
+sed -i'.bak' "$ s/$/\/name=${1}\/LocalIP=${2}/" /usr/share/easy-rsa/pki/index.txt
 # Certificate properties
 CA="$(cat ./pki/ca.crt )"
 CERT="$(cat ./pki/issued/${1}.crt | grep -zEo -e '-----BEGIN CERTIFICATE-----(\n|.)*-----END CERTIFICATE-----' | tr -d '\0')"

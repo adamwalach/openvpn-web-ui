@@ -32,6 +32,7 @@ type Details struct {
 	Country      string
 	Organisation string
 	Email        string
+	LocalIP      string
 }
 
 func ReadCerts(path string) ([]*Cert, error) {
@@ -83,6 +84,8 @@ func parseDetails(d string) *Details {
 				details.Organisation = fields[1]
 			case "emailAddress":
 				details.Email = fields[1]
+			case "LocalIP":
+				details.LocalIP = fields[1]
 			default:
 				beego.Warn(fmt.Sprintf("Undefined entry: %s", line))
 			}
@@ -101,11 +104,12 @@ func CreateCertificate(name string, staticip string) error {
 		pass = true
 	}
 	if !pass {
+		staticip = "not.defined"
 		cmd := exec.Command("/bin/bash", "-c",
 			fmt.Sprintf(
 				"cd /opt/scripts/ && "+
 					"export KEY_NAME=%s &&"+
-					"./genclient.sh %s", name, name))
+					"./genclient.sh %s %s", name, name, staticip))
 		cmd.Dir = state.GlobalCfg.OVConfigPath
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -120,8 +124,8 @@ func CreateCertificate(name string, staticip string) error {
 			fmt.Sprintf(
 				"cd /opt/scripts/ && "+
 					"export KEY_NAME=%s &&"+
-					"./genclient.sh %s &&"+
-					"echo 'ifconfig-push %s 255.255.255.0' > /etc/openvpn/staticclients/%s", name, name, staticip, name))
+					"./genclient.sh %s %s &&"+
+					"echo 'ifconfig-push %s 255.255.255.0' > /etc/openvpn/staticclients/%s", name, name, staticip, staticip, name))
 		cmd.Dir = state.GlobalCfg.OVConfigPath
 		output, err := cmd.CombinedOutput()
 		if err != nil {
