@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os/exec"
@@ -9,7 +10,8 @@ import (
 
 	"github.com/adamwalach/openvpn-web-ui/state"
 
-	//	"path/filepath"
+	"path/filepath"
+
 	"github.com/astaxie/beego"
 )
 
@@ -99,11 +101,27 @@ func trim(s string) string {
 }
 
 func CreateCertificate(name string, staticip string) error {
-	pass := false
+	path := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/index.txt")
+	haveip := false
+	existsError := errors.New("Error! There is already a valid or invalid certificate for the name \"" + name + "\"")
 	if staticip != "" {
-		pass = true
+		haveip = true
 	}
-	if !pass {
+	certs, err := ReadCerts(path)
+	if err != nil {
+		//		beego.Debug(string(output))
+		beego.Error(err)
+		//		return err
+	}
+	Dump(certs)
+	exists := false
+	for _, v := range certs {
+		if v.Details.Name == name {
+			exists = true
+		}
+	}
+	if !exists && !haveip {
+		staticip = "not.defined"
 		cmd := exec.Command("/bin/bash", "-c",
 			fmt.Sprintf(
 				"cd /opt/scripts/ && "+
@@ -118,7 +136,7 @@ func CreateCertificate(name string, staticip string) error {
 		}
 		return nil
 	}
-	if pass {
+	if !exists && haveip {
 		cmd := exec.Command("/bin/bash", "-c",
 			fmt.Sprintf(
 				"cd /opt/scripts/ && "+
@@ -134,7 +152,7 @@ func CreateCertificate(name string, staticip string) error {
 		}
 		return nil
 	}
-	return nil
+	return existsError
 }
 
 func RevokeCertificate(name string) error {
