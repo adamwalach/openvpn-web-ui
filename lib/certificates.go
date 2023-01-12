@@ -185,3 +185,18 @@ func Restart() error {
 	}
 	return nil
 }
+
+func RemoveCertificate(name string, serial string) error {
+	cmd := exec.Command("/bin/bash", "-c",
+		fmt.Sprintf(
+			"cd /opt/scripts/ && "+
+				"./rmcert.sh %s %s", name, serial))
+	cmd.Dir = state.GlobalCfg.OVConfigPath
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		beego.Debug(string(output))
+		beego.Error(err)
+		return err
+	}
+	return nil
+}
