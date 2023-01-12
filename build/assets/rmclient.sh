@@ -11,8 +11,9 @@ if [[ ! -f $DEST_FILE_PATH ]]; then
     exit 1
 fi
 
-# Fix index.txt by remove /name=$1
-sed -i'.bak' "s/\/name=${1}//" /usr/share/easy-rsa/pki/index.txt
+# Fix index.txt by removing everything after pattern "/name=$1" in the line
+sed -i'.bak' "s/\/name=${1}.*//" /usr/share/easy-rsa/pki/index.txt
+
 export EASYRSA_BATCH=1 # see https://superuser.com/questions/1331293/easy-rsa-v3-execute-build-ca-and-gen-req-silently
 
 echo 'Revoke certificate...'
