@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/adamwalach/openvpn-web-ui/state"
-
-	"path/filepath"
-
 	"github.com/astaxie/beego"
 )
 
