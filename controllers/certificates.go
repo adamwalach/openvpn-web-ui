@@ -126,8 +126,8 @@ func (c *CertificatesController) Remove() {
 	serial := c.GetString(":serial")
 	if err := lib.RemoveCertificate(name, serial); err != nil {
 		beego.Error(err)
-		flash.Error(err.Error())
-		flash.Store(&c.Controller)
+		//flash.Error(err.Error())
+		//flash.Store(&c.Controller)
 	} else {
 		flash.Error("Success! Certificate for the name \"" + name + "\" has been removed")
 		flash.Store(&c.Controller)

@@ -89,7 +89,7 @@
                     <td></td>
                     {{else}}
                     <td>
-                      <a class="btn btn-danger btn-sm" title="Remove" href="{{urlfor "CertificatesController.Remove" ":key" .Details.Name ":serial" .Serial}}">Remove</a>
+                      <a href="{{urlfor "CertificatesController.Remove" ":key" .Details.Name ":serial" .Serial}}" class="btn btn-danger btn-sm" title="Remove">Remove</a>
                     </td>
                     {{end}}
                   </td>
