@@ -120,19 +120,11 @@ func (c *CertificatesController) Restart() {
 
 // @router /certificates/remove/:key/:serial [get]
 func (c *CertificatesController) Remove() {
-	c.TplName = "certificates.html"
-	flash := beego.NewFlash()
 	name := c.GetString(":key")
 	serial := c.GetString(":serial")
-	if err := lib.RemoveCertificate(name, serial); err != nil {
-		beego.Error(err)
-		//flash.Error(err.Error())
-		//flash.Store(&c.Controller)
-	} else {
-		flash.Error("Success! Certificate for the name \"" + name + "\" has been removed")
-		flash.Store(&c.Controller)
-	}
-	c.showCerts()
+	lib.RemoveCertificate(name, serial)
+	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
+	return
 }
 
 func validateCertParams(cert NewCertParams) map[string]map[string]string {
