@@ -27,12 +27,15 @@ type Cert struct {
 }
 
 type Details struct {
-	Name         string
-	CN           string
-	Country      string
-	Organisation string
-	Email        string
-	LocalIP      string
+	Name             string
+	CN               string
+	Country          string
+	State            string
+	City             string
+	Organisation     string
+	OrganisationUnit string
+	Email            string
+	LocalIP          string
 }
 
 func ReadCerts(path string) ([]*Cert, error) {
@@ -80,8 +83,14 @@ func parseDetails(d string) *Details {
 				details.CN = fields[1]
 			case "C":
 				details.Country = fields[1]
+			case "ST":
+				details.State = fields[1]
+			case "L":
+				details.City = fields[1]
 			case "O":
 				details.Organisation = fields[1]
+			case "OU":
+				details.OrganisationUnit = fields[1]
 			case "emailAddress":
 				details.Email = fields[1]
 			case "LocalIP":
