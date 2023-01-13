@@ -135,7 +135,10 @@
               <label for="name">Name</label>
             </th>
             <th>
-              <label for="name">Client Static IP (Optional)</label>
+              <label for="name">Passphrase (Optional)</label>
+            </th>
+            <th>
+              <label for="name">Static IP (Optional)</label>
             </th>
           </tr>
         </thead>
@@ -145,6 +148,10 @@
               <input type="text" class="form-control" placeholder="Enter name" id="Name" name="Name">
             </td>
             <td class="form-group">
+              <input type="text" class="form-control" placeholder="Enter Password" id="password-input" id="passphrase" name="passphrase">
+              <a href="#" class="password-control" title="Show or Hide Password"></a>
+            </td>
+            <td class="form-group">
               <input type="text" class="form-control" placeholder="Enter Static IP" id="staticip" name="staticip">
             </td>
           </tr>
@@ -152,10 +159,13 @@
         <tbody>
           <tr>
             <td class="form-group">
-              <span class="help-block">Name is used as the common name of the certificate.&nbsp;<span>
+              <span class="help-block">Common name of the certificate.&nbsp;<span>
             </td>
             <td class="form-group">
-              <span class="help-block">Client Static IP is optional. Used as a local Client IP for subnet split.</span>
+              <span class="help-block">Passphrase is used for privte key protection.&nbsp;</span>
+            </td>
+            <td class="form-group">
+              <span class="help-block">Client Static IP used as a local Client IP for subnet split.</span>
             </td>
           </tr>
         </tbody>

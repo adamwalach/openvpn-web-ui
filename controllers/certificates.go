@@ -118,7 +118,7 @@ func (c *CertificatesController) Restart() {
 	return
 }
 
-// @router /certificates/burn/benzin/:key/:serial [get]
+// @router /certificates/burn/:key/:serial [get]
 func (c *CertificatesController) Burn() {
 	c.TplName = "certificates.html"
 	flash := beego.NewFlash()
