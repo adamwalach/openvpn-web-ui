@@ -2,7 +2,6 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/context/param"
 )
 
 func init() {
@@ -80,9 +79,7 @@ func init() {
 	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] = append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
 		beego.ControllerComments{
 			Method:           "Remove",
-			Router:           "/certificates/remove/:key/:serial",
+			Router:           "/certificates/remove/:key",
 			AllowHTTPMethods: []string{"get"},
-			MethodParams:     param.Make(),
-			//		Filters: nil,
-			Params: nil})
+			Params:           nil})
 }
