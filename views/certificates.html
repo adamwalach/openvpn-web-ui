@@ -90,7 +90,7 @@
                     <td></td>
                     {{else}}
                     <td>
-                      <a href="{{urlfor "CertificatesController.Burn" ":serial" .Serial ":keys" .Details.CN}}" class="btn btn-danger btn-sm" title="Burn">Remove</a>
+                      <a href="{{urlfor "CertificatesController.Burn" ":key" .Details.CN ":serial" .Serial}}" class="btn btn-danger btn-sm" title="Burn">Remove</a>
                     </td>
                     {{end}}
               </tr>

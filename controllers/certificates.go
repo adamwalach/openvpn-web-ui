@@ -118,13 +118,13 @@ func (c *CertificatesController) Restart() {
 	return
 }
 
-// @router /certificates/burn/benzin/:serial/:keys [get]
+// @router /certificates/burn/benzin/:key/:serial [get]
 func (c *CertificatesController) Burn() {
 	c.TplName = "certificates.html"
 	flash := beego.NewFlash()
+	CN := c.GetString(":key")
 	serial := c.GetString(":serial")
-	CN := c.GetString(":keys")
-	if err := lib.BurnCertificate(serial, CN); err != nil {
+	if err := lib.BurnCertificate(CN, serial); err != nil {
 		beego.Error(err)
 		//flash.Error(err.Error())
 		//flash.Store(&c.Controller)

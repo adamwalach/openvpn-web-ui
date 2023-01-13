@@ -82,7 +82,7 @@ func init() {
 		append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
 			beego.ControllerComments{
 				Method:           "Burn",
-				Router:           `/certificates/burn/benzin/:serial/:keys`,
+				Router:           `/certificates/burn/benzin/:key/:serial`,
 				AllowHTTPMethods: []string{"get"},
 				Params:           nil})
 }
