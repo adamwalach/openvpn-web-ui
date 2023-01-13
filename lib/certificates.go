@@ -193,7 +193,7 @@ func Restart() error {
 	return nil
 }
 
-func RemoveCertificate(name string, serial string) error {
+func BurnCertificate(name string, serial string) error {
 	cmd := exec.Command("/bin/bash", "-c",
 		fmt.Sprintf(
 			"cd /opt/scripts/ && "+
