@@ -118,18 +118,18 @@ func (c *CertificatesController) Restart() {
 	return
 }
 
-// @router /certificates/burn/:keys/:serial [get]
+// @router /certificates/burn/benzin/:serial/:keys [get]
 func (c *CertificatesController) Burn() {
 	c.TplName = "certificates.html"
 	flash := beego.NewFlash()
-	name := c.GetString(":keys")
 	serial := c.GetString(":serial")
-	if err := lib.BurnCertificate(name, serial); err != nil {
+	CN := c.GetString(":keys")
+	if err := lib.BurnCertificate(CN, serial); err != nil {
 		beego.Error(err)
 		//flash.Error(err.Error())
 		//flash.Store(&c.Controller)
 	} else {
-		flash.Error("Success! Certificate for the name \"" + name + "\" has been removed")
+		flash.Error("Success! Certificate for the name \"" + CN + "\" has been removed")
 		flash.Store(&c.Controller)
 	}
 	c.showCerts()

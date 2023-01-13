@@ -193,11 +193,11 @@ func Restart() error {
 	return nil
 }
 
-func BurnCertificate(name string, serial string) error {
+func BurnCertificate(serial string, CN string) error {
 	cmd := exec.Command("/bin/bash", "-c",
 		fmt.Sprintf(
 			"cd /opt/scripts/ && "+
-				"./rmcert.sh %s %s", name, serial))
+				"./rmcert.sh %s %s", CN, serial))
 	cmd.Dir = state.GlobalCfg.OVConfigPath
 	output, err := cmd.CombinedOutput()
 	if err != nil {
