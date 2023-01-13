@@ -52,47 +52,47 @@
                       <img src="/static/img/x-circle-fill.svg" width="16" height="16" alt="Invalid">
                     </td>
                   {{end}}
-                  <td>
-                    {{ .Details.LocalIP }}
-                  </td>
+                    <td>
+                      {{ .Details.LocalIP }}
+                    </td>
 
                   {{if eq .Revocation ""}}
-                  <td>
-                    <span class="label label-success">{{ dateformat .ExpirationT "2006-01-02 15:04"}}</span>
-                  </td>
+                    <td>
+                      <span class="label label-success">{{ dateformat .ExpirationT "2006-01-02 15:04"}}</span>
+                    </td>
                   {{else}}
-                  <td>
-                    <span class="label label-danger">{{ dateformat .ExpirationT "2006-01-02 15:04"}}</span>
-                  </td>
+                    <td>
+                      <span class="label label-danger">{{ dateformat .ExpirationT "2006-01-02 15:04"}}</span>
+                    </td>
                   {{end}}
                   {{if eq .Revocation ""}}
-                  <td></td>
+                    <td></td>
                   {{else}}
-                  <td>
-                    <span class="label label-danger">{{ dateformat .RevocationT "2006-01-02 15:04"}}</span>
-                  </td>
+                    <td>
+                      <span class="label label-danger">{{ dateformat .RevocationT "2006-01-02 15:04"}}</span>
+                    </td>
                   {{end}}
-                  <td>
-                    {{ .Serial }}
-                  </td>
-                  <td>
-                    <span class="label label-warning">CN: {{ .Details.CN }}</span>
-                    <span class="label label-warning">Email: {{ .Details.Email }}</span>
-                  </td>
-                    {{ if eq .Revocation ""}}
+                    <td>
+                      {{ .Serial }}
+                    </td>
+                    <td>
+                      <span class="label label-warning">CN: {{ .Details.CN }}</span>
+                      <span class="label label-warning">Email: {{ .Details.Email }}</span>
+                    </td>
+                  {{ if eq .Revocation ""}}
                     <td>
                       <a href="{{urlfor "CertificatesController.Revoke" ":key" .Details.Name}}" class="btn btn-warning btn-sm" title="Revoke">Revoke</a>
                     </td>
-                    {{else}}
+                  {{else}}
                     <td></td>
-                    {{end}}
-                    {{ if eq .Revocation ""}}
+                  {{end}}
+                  {{ if eq .Revocation ""}}
                     <td></td>
-                    {{else}}
+                  {{else}}
                     <td>
                       <a href="{{urlfor "CertificatesController.Burn" ":key" .Details.CN ":serial" .Serial}}" class="btn btn-danger btn-sm" title="Burn">Remove</a>
                     </td>
-                    {{end}}
+                  {{end}}
               </tr>
               {{ end }}
             {{end}}
