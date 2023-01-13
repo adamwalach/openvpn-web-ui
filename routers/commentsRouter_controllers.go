@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/context/param"
 )
 
 func init() {
@@ -81,5 +82,7 @@ func init() {
 			Method:           "Remove",
 			Router:           "/certificates/remove/:key/:serial",
 			AllowHTTPMethods: []string{"get"},
-			Params:           nil})
+			MethodParams:     param.Make(),
+			//		Filters: nil,
+			Params: nil})
 }
