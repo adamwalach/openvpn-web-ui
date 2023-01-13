@@ -124,7 +124,7 @@ func (c *CertificatesController) Burn() {
 	flash := beego.NewFlash()
 	serial := c.GetString(":serial")
 	CN := c.GetString(":keys")
-	if err := lib.BurnCertificate(CN, serial); err != nil {
+	if err := lib.BurnCertificate(serial, CN); err != nil {
 		beego.Error(err)
 		//flash.Error(err.Error())
 		//flash.Store(&c.Controller)
