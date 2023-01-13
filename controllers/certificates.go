@@ -120,10 +120,11 @@ func (c *CertificatesController) Restart() {
 
 // @router /certificates/remove/:key/:serial [get]
 func (c *CertificatesController) Remove() {
+	c.TplName = "certificates.html"
 	name := c.GetString(":key")
 	serial := c.GetString(":serial")
 	lib.RemoveCertificate(name, serial)
-	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
+	//	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
 	return
 }
 
