@@ -25,7 +25,7 @@ cp /etc/openvpn/config/easy-rsa.vars ./vars
 printf "KEY_COUNTRY=$KEY_COUNTRY\n"
 
 # Generate certificates
-if  [[ -z $2 ]]; then
+if  [[ -z $3 ]]; then
     echo 'Without password...'
    # export KEY_NAME="$1"
 ./easyrsa --batch --req-cn="$1" gen-req "$1" nopass 
@@ -34,7 +34,7 @@ else
     # See https://stackoverflow.com/questions/4294689/how-to-generate-an-openssl-key-using-a-passphrase-from-the-command-line
     # ... and https://stackoverflow.com/questions/22415601/using-easy-rsa-how-to-automate-client-server-creation-process
     # ... and https://github.com/OpenVPN/easy-rsa/blob/master/doc/EasyRSA-Advanced.md
-    (echo -e '\n') | ./easyrsa --batch --req-cn="$1" --passin=pass:${2} --passout=pass:${2} gen-req "$1"
+    (echo -e '\n') | ./easyrsa --batch --req-cn="$1" --passin=pass:${3} --passout=pass:${3} gen-req "$1"
 fi
 
 # Sign request

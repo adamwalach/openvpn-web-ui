@@ -16,8 +16,9 @@ import (
 )
 
 type NewCertParams struct {
-	Name     string `form:"Name" valid:"Required;"`
-	Staticip string `form:"staticip"`
+	Name       string `form:"Name" valid:"Required;"`
+	Staticip   string `form:"staticip"`
+	Passphrase string `form:"passphrase"`
 }
 
 type CertificatesController struct {
@@ -90,7 +91,7 @@ func (c *CertificatesController) Post() {
 		if vMap := validateCertParams(cParams); vMap != nil {
 			c.Data["validation"] = vMap
 		} else {
-			if err := lib.CreateCertificate(cParams.Name, cParams.Staticip); err != nil {
+			if err := lib.CreateCertificate(cParams.Name, cParams.Staticip, cParams.Passphrase); err != nil {
 				beego.Error(err)
 				flash.Error(err.Error())
 				flash.Store(&c.Controller)

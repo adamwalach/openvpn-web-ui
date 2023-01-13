@@ -107,12 +107,16 @@ func trim(s string) string {
 	return strings.Trim(strings.Trim(s, "\r\n"), "\n")
 }
 
-func CreateCertificate(name string, staticip string) error {
+func CreateCertificate(name string, staticip string, passphrase string) error {
 	path := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/index.txt")
 	haveip := false
+	pass := false
 	existsError := errors.New("Error! There is already a valid or invalid certificate for the name \"" + name + "\"")
 	if staticip != "" {
 		haveip = true
+	}
+	if passphrase != "" {
+		pass = true
 	}
 	certs, err := ReadCerts(path)
 	if err != nil {
@@ -127,39 +131,75 @@ func CreateCertificate(name string, staticip string) error {
 			exists = true
 		}
 	}
-	if !exists && !haveip {
-		staticip = "not.defined"
-		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(
-				"cd /opt/scripts/ && "+
-					"export KEY_NAME=%s &&"+
-					"./genclient.sh %s %s", name, name, staticip))
-		cmd.Dir = state.GlobalCfg.OVConfigPath
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			beego.Debug(string(output))
-			beego.Error(err)
-			return err
+	if !pass {
+		if !exists && !haveip {
+			staticip = "not.defined"
+			cmd := exec.Command("/bin/bash", "-c",
+				fmt.Sprintf(
+					"cd /opt/scripts/ && "+
+						"export KEY_NAME=%s &&"+
+						"./genclient.sh %s %s", name, name, staticip))
+			cmd.Dir = state.GlobalCfg.OVConfigPath
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				beego.Debug(string(output))
+				beego.Error(err)
+				return err
+			}
+			return nil
 		}
-		return nil
-	}
-	if !exists && haveip {
-		cmd := exec.Command("/bin/bash", "-c",
-			fmt.Sprintf(
-				"cd /opt/scripts/ && "+
-					"export KEY_NAME=%s &&"+
-					"./genclient.sh %s %s &&"+
-					"echo 'ifconfig-push %s 255.255.255.0' > /etc/openvpn/staticclients/%s", name, name, staticip, staticip, name))
-		cmd.Dir = state.GlobalCfg.OVConfigPath
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			beego.Debug(string(output))
-			beego.Error(err)
-			return err
+		if !exists && haveip {
+			cmd := exec.Command("/bin/bash", "-c",
+				fmt.Sprintf(
+					"cd /opt/scripts/ && "+
+						"export KEY_NAME=%s &&"+
+						"./genclient.sh %s %s &&"+
+						"echo 'ifconfig-push %s 255.255.255.0' > /etc/openvpn/staticclients/%s", name, name, staticip, staticip, name))
+			cmd.Dir = state.GlobalCfg.OVConfigPath
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				beego.Debug(string(output))
+				beego.Error(err)
+				return err
+			}
+			return nil
 		}
-		return nil
+		return existsError
+	} else {
+		if !exists && !haveip {
+			staticip = "not.defined"
+			cmd := exec.Command("/bin/bash", "-c",
+				fmt.Sprintf(
+					"cd /opt/scripts/ && "+
+						"export KEY_NAME=%s &&"+
+						"./genclient.sh %s %s %s", name, name, staticip, passphrase))
+			cmd.Dir = state.GlobalCfg.OVConfigPath
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				beego.Debug(string(output))
+				beego.Error(err)
+				return err
+			}
+			return nil
+		}
+		if !exists && haveip {
+			cmd := exec.Command("/bin/bash", "-c",
+				fmt.Sprintf(
+					"cd /opt/scripts/ && "+
+						"export KEY_NAME=%s &&"+
+						"./genclient.sh %s %s %s &&"+
+						"echo 'ifconfig-push %s 255.255.255.0' > /etc/openvpn/staticclients/%s", name, name, staticip, passphrase, staticip, name))
+			cmd.Dir = state.GlobalCfg.OVConfigPath
+			output, err := cmd.CombinedOutput()
+			if err != nil {
+				beego.Debug(string(output))
+				beego.Error(err)
+				return err
+			}
+			return nil
+		}
+		return existsError
 	}
-	return existsError
 }
 
 func RevokeCertificate(name string) error {
