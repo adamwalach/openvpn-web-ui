@@ -122,7 +122,7 @@ func (c *CertificatesController) Restart() {
 func (c *CertificatesController) Remove() {
 	name := c.GetString(":key")
 	lib.RemoveCertificate(name)
-	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
+	//c.Redirect(c.URLFor("CertificatesController.Get"), 302)
 	return
 }
 

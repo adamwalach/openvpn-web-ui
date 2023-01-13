@@ -62,24 +62,27 @@ func init() {
 				AllowHTTPMethods: []string{"post"},
 				Params:           nil})
 
-	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] = append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
-		beego.ControllerComments{
-			Method:           "Revoke",
-			Router:           `/certificates/revoke/:key`,
-			AllowHTTPMethods: []string{"get"},
-			Params:           nil})
+	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] =
+		append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
+			beego.ControllerComments{
+				Method:           "Revoke",
+				Router:           `/certificates/revoke/:key`,
+				AllowHTTPMethods: []string{"get"},
+				Params:           nil})
 
-	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] = append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
-		beego.ControllerComments{
-			Method:           "Restart",
-			Router:           `/certificates/restart`,
-			AllowHTTPMethods: []string{"get"},
-			Params:           nil})
+	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] =
+		append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
+			beego.ControllerComments{
+				Method:           "Restart",
+				Router:           `/certificates/restart`,
+				AllowHTTPMethods: []string{"get"},
+				Params:           nil})
 
-	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] = append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
-		beego.ControllerComments{
-			Method:           "Remove",
-			Router:           `/certificates/remove/:key`,
-			AllowHTTPMethods: []string{"get"},
-			Params:           nil})
+	beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"] =
+		append(beego.GlobalControllerRouter["github.com/adamwalach/openvpn-web-ui/controllers:CertificatesController"],
+			beego.ControllerComments{
+				Method:           "Remove",
+				Router:           `/certificates/remove/:key`,
+				AllowHTTPMethods: []string{"get"},
+				Params:           nil})
 }
