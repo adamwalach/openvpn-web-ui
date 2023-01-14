@@ -7,7 +7,6 @@ import (
 	"github.com/d3vilh/openvpn-web-ui/lib"
 	"github.com/d3vilh/openvpn-web-ui/models"
 	"github.com/d3vilh/openvpn-web-ui/routers"
-	_ "github.com/d3vilh/openvpn-web-ui/routers"
 	"github.com/d3vilh/openvpn-web-ui/state"
 	"path/filepath"
 )
