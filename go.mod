@@ -5,6 +5,7 @@ require (
 	github.com/adamwalach/go-openvpn v0.0.0-20170320215004-37de024281f7
 	github.com/astaxie/beego v1.10.0
 	github.com/cloudfoundry/gosigar v0.0.0-20160602191207-c32d31af94b0
+	github.com/d3vilh/openvpn-server-config v0.0.0-20230114124917-c9220f0a65d9
 	github.com/go-ldap/ldap/v3 v3.1.5
 	github.com/mattn/go-sqlite3 v1.2.1-0.20161215041557-2d44decb4941
 	github.com/stretchr/testify v1.4.0

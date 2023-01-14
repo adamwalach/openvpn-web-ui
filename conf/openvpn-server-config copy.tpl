@@ -3,7 +3,7 @@ management 0.0.0.0 2080
 port {{ .Port }}
 proto {{ .Proto }}
 
-dev {{ .Device }}
+dev tun
 
 ca {{ .Ca }}
 cert {{ .Cert }}
@@ -14,12 +14,12 @@ keysize {{ .Keysize }}
 auth {{ .Auth }}
 dh {{ .Dh }}
 
-server {{ .Server }}}
-route {{ .Route }}
+server 10.0.70.0 255.255.255.0
+route 10.0.71.0 255.255.255.0
 ifconfig-pool-persist {{ .IfconfigPoolPersist }}
-push  {{ .PushRoute }}
-push {{ .DNSServer1 }}
-push {{ .DNSServer2 }}
+push "route 10.0.60.0 255.255.255.0"
+push "dhcp-option DNS 8.8.8.8"
+push "dhcp-option DNS 8.8.4.4"
 
 keepalive {{ .Keepalive }}
 comp-lzo

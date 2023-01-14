@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/adamwalach/go-openvpn/server/config"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/d3vilh/openvpn-server-config/server/config"
 	"gopkg.in/hlandau/passlib.v1"
 )
 
@@ -84,8 +84,12 @@ func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string
 	c := OVConfig{
 		Profile: "default",
 		Config: config.Config{
+			Device:              "tun",
 			Port:                1194,
+			ClientPort:          12235,
 			Proto:               "udp",
+			DNSServer1:          "# push \"dhcp-option DNS 8.8.8.8\"",
+			DNSServer2:          "# push \"dhcp-option DNS 1.0.0.1\"",
 			Cipher:              "AES-256-CBC",
 			Keysize:             256,
 			Auth:                "SHA512",
