@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/adamwalach/go-openvpn/client/config"
 	"github.com/adamwalach/openvpn-web-ui/lib"
 	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"github.com/d3vilh/openvpn-server-config/client/config"
 )
 
 type NewCertParams struct {
