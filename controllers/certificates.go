@@ -106,10 +106,18 @@ func (c *CertificatesController) Post() {
 
 // @router /certificates/revoke/:key [get]
 func (c *CertificatesController) Revoke() {
+	c.TplName = "certificates.html"
+	flash := beego.NewFlash()
 	name := c.GetString(":key")
-	lib.RevokeCertificate(name)
-	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
-	return
+	if err := lib.RevokeCertificate(name); err != nil {
+		beego.Error(err)
+		//flash.Error(err.Error())
+		//flash.Store(&c.Controller)
+	} else {
+		flash.Warning("Success! Certificate for the name \"" + name + "\" has been revoked")
+		flash.Store(&c.Controller)
+	}
+	c.showCerts()
 }
 
 // @router /certificates/restart [get]
@@ -130,7 +138,7 @@ func (c *CertificatesController) Burn() {
 		//flash.Error(err.Error())
 		//flash.Store(&c.Controller)
 	} else {
-		flash.Error("Success! Certificate for the name \"" + CN + "\" has been removed")
+		flash.Success("Success! Certificate for the name \"" + CN + "\" has been removed")
 		flash.Store(&c.Controller)
 	}
 	c.showCerts()
