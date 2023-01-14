@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"github.com/adamwalach/openvpn-web-ui/state"
+	"github.com/d3vilh/openvpn-web-ui/state"
 	"html/template"
 
-	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/d3vilh/openvpn-web-ui/models"
 )
 
 type SettingsController struct {

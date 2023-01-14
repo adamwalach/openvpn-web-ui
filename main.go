@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/adamwalach/openvpn-web-ui/lib"
-	"github.com/adamwalach/openvpn-web-ui/models"
-	"github.com/adamwalach/openvpn-web-ui/routers"
-	_ "github.com/adamwalach/openvpn-web-ui/routers"
-	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
+	"github.com/d3vilh/openvpn-web-ui/lib"
+	"github.com/d3vilh/openvpn-web-ui/models"
+	"github.com/d3vilh/openvpn-web-ui/routers"
+	_ "github.com/d3vilh/openvpn-web-ui/routers"
+	"github.com/d3vilh/openvpn-web-ui/state"
 	"path/filepath"
 )
 

@@ -4,8 +4,8 @@ import (
 	"html/template"
 	"time"
 
-	"github.com/adamwalach/openvpn-web-ui/lib"
 	"github.com/astaxie/beego"
+	"github.com/d3vilh/openvpn-web-ui/lib"
 )
 
 type LoginController struct {

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/d3vilh/openvpn-web-ui/models"
 	"github.com/go-ldap/ldap/v3"
 	"gopkg.in/hlandau/passlib.v1"
 )

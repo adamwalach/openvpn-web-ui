@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"github.com/adamwalach/openvpn-web-ui/lib"
-	"github.com/adamwalach/openvpn-web-ui/state"
+	"fmt"
 	"github.com/astaxie/beego"
-        "fmt"
-	mi "github.com/adamwalach/go-openvpn/server/mi"
+	mi "github.com/d3vilh/openvpn-server-config/server/mi"
+	"github.com/d3vilh/openvpn-web-ui/lib"
+	"github.com/d3vilh/openvpn-web-ui/state"
 )
 
 type MainController struct {
@@ -29,8 +29,8 @@ func (c *MainController) Get() {
 	status, err := client.GetStatus()
 	if err != nil {
 		beego.Error(err)
-                beego.Warn(fmt.Sprintf("passed client line: %s", client))
-                beego.Warn(fmt.Sprintf("error: %s", err))
+		beego.Warn(fmt.Sprintf("passed client line: %s", client))
+		beego.Warn(fmt.Sprintf("error: %s", err))
 	} else {
 		c.Data["ovstatus"] = status
 	}

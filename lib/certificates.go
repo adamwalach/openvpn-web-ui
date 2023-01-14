@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adamwalach/openvpn-web-ui/state"
 	"github.com/astaxie/beego"
+	"github.com/d3vilh/openvpn-web-ui/state"
 )
 
 // Cert
