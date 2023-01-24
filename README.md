@@ -2,6 +2,8 @@
 
 Simple OpenVPN instance for Raspberry Pi based home server. 
 
+# This project detached into standalone branch - [openvpn-ui](https://github.com/d3vilh/openvpn-ui) which includes many new features and optimisations.
+
 ## Summary
 OpenVPN server web administration interface.
 
@@ -30,6 +32,7 @@ It does include 2 different Docker containers:
 * New feature for Certificates revocation via WEB UI
 * New feature for Back-End OpenVPN container restart via WEB UI
 * New feature for Static IP configuration for clients (work in progress)
+* [openvpn-ui](https://github.com/d3vilh/openvpn-ui) standalone evolution of this project
 
 ### Run this image using a `docker-compose.yml` file
 
