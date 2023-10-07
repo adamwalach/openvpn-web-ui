@@ -5,6 +5,8 @@ Simple OpenVPN instance for Raspberry Pi based home server.
 # This project detached into standalone branch - [openvpn-ui](https://github.com/d3vilh/openvpn-ui) which includes many new features and optimisations.
 
 ## Summary
+<img src="https://raw.githubusercontent.com/d3vilh/openvpn-ui/main/docs/images/OpenVPN-UI-Home.png" alt="Openvpn-ui home screen"/>
+
 OpenVPN server web administration interface.
 
 Goal: create quick to deploy and easy to use solution that makes work with small OpenVPN environments a breeze.
