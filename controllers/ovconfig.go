@@ -2,17 +2,21 @@ package controllers
 
 import (
 	"html/template"
+	"path/filepath"
 
-	"github.com/adamwalach/go-openvpn/server/config"
-	mi "github.com/adamwalach/go-openvpn/server/mi"
-	"github.com/adamwalach/openvpn-web-ui/lib"
-	"github.com/adamwalach/openvpn-web-ui/models"
+	"github.com/d3vilh/openvpn-web-ui/state"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/d3vilh/openvpn-server-config/server/config"
+	mi "github.com/d3vilh/openvpn-server-config/server/mi"
+	"github.com/d3vilh/openvpn-web-ui/lib"
+	"github.com/d3vilh/openvpn-web-ui/models"
 )
 
 type OVConfigController struct {
 	BaseController
+	ConfigDir string
 }
 
 func (c *OVConfigController) NestPrepare() {
@@ -29,7 +33,7 @@ func (c *OVConfigController) Get() {
 	c.TplName = "ovconfig.html"
 	c.Data["xsrfdata"] = template.HTML(c.XSRFFormHTML())
 	cfg := models.OVConfig{Profile: "default"}
-	cfg.Read("Profile")
+	_ = cfg.Read("Profile")
 	c.Data["Settings"] = &cfg
 
 }
@@ -38,7 +42,7 @@ func (c *OVConfigController) Post() {
 	c.TplName = "ovconfig.html"
 	flash := beego.NewFlash()
 	cfg := models.OVConfig{Profile: "default"}
-	cfg.Read("Profile")
+	_ = cfg.Read("Profile")
 	if err := c.ParseForm(&cfg); err != nil {
 		beego.Warning(err)
 		flash.Error(err.Error())
@@ -48,8 +52,8 @@ func (c *OVConfigController) Post() {
 	lib.Dump(cfg)
 	c.Data["Settings"] = &cfg
 
-	destPath := models.GlobalCfg.OVConfigPath + "/server.conf"
-	err := config.SaveToFile("conf/openvpn-server-config.tpl", cfg.Config, destPath)
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "config/server.conf")
+	err := config.SaveToFile(filepath.Join(c.ConfigDir, "openvpn-server-config.tpl"), cfg.Config, destPath)
 	if err != nil {
 		beego.Warning(err)
 		flash.Error(err.Error())
@@ -62,7 +66,7 @@ func (c *OVConfigController) Post() {
 		flash.Error(err.Error())
 	} else {
 		flash.Success("Config has been updated")
-		client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+		client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 		if err := client.Signal("SIGTERM"); err != nil {
 			flash.Warning("Config has been updated but OpenVPN server was NOT reloaded: " + err.Error())
 		}

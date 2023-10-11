@@ -8,21 +8,22 @@
 package routers
 
 import (
-	"github.com/adamwalach/openvpn-web-ui/controllers"
+	//	"github.com/adamwalach/openvpn-web-ui/controllers"
 	"github.com/astaxie/beego"
+	"github.com/d3vilh/openvpn-web-ui/controllers"
 )
 
-func init() {
+func Init(configDir string) {
 	beego.SetStaticPath("/swagger", "swagger")
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/login", &controllers.LoginController{}, "get,post:Login")
 	beego.Router("/logout", &controllers.LoginController{}, "get:Logout")
 	beego.Router("/profile", &controllers.ProfileController{})
 	beego.Router("/settings", &controllers.SettingsController{})
-	beego.Router("/ov/config", &controllers.OVConfigController{})
+	beego.Router("/ov/config", &controllers.OVConfigController{ConfigDir: configDir})
 	beego.Router("/logs", &controllers.LogsController{})
 
-	beego.Include(&controllers.CertificatesController{})
+	beego.Include(&controllers.CertificatesController{ConfigDir: configDir})
 
 	ns := beego.NewNamespace("/api/v1",
 		beego.NSNamespace("/session",

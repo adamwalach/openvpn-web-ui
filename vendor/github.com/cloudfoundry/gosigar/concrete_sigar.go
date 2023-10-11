@@ -56,6 +56,12 @@ func (c *ConcreteSigar) GetMem() (Mem, error) {
 	return m, err
 }
 
+func (c *ConcreteSigar) GetMemIgnoringCGroups() (Mem, error) {
+	m := Mem{}
+	err := m.GetIgnoringCGroups()
+	return m, err
+}
+
 func (c *ConcreteSigar) GetSwap() (Swap, error) {
 	s := Swap{}
 	err := s.Get()

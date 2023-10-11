@@ -207,11 +207,11 @@ func (n *Namespace) Include(cList ...ControllerInterface) *Namespace {
 func (n *Namespace) Namespace(ns ...*Namespace) *Namespace {
 	for _, ni := range ns {
 		for k, v := range ni.handlers.routers {
-			if t, ok := n.handlers.routers[k]; ok {
+			if _, ok := n.handlers.routers[k]; ok {
 				addPrefix(v, ni.prefix)
 				n.handlers.routers[k].AddTree(ni.prefix, v)
 			} else {
-				t = NewTree()
+				t := NewTree()
 				t.AddTree(ni.prefix, v)
 				addPrefix(t, ni.prefix)
 				n.handlers.routers[k] = t
@@ -236,11 +236,11 @@ func (n *Namespace) Namespace(ns ...*Namespace) *Namespace {
 func AddNamespace(nl ...*Namespace) {
 	for _, n := range nl {
 		for k, v := range n.handlers.routers {
-			if t, ok := BeeApp.Handlers.routers[k]; ok {
+			if _, ok := BeeApp.Handlers.routers[k]; ok {
 				addPrefix(v, n.prefix)
 				BeeApp.Handlers.routers[k].AddTree(n.prefix, v)
 			} else {
-				t = NewTree()
+				t := NewTree()
 				t.AddTree(n.prefix, v)
 				addPrefix(t, n.prefix)
 				BeeApp.Handlers.routers[k] = t
@@ -267,13 +267,12 @@ func addPrefix(t *Tree, prefix string) {
 		addPrefix(t.wildcard, prefix)
 	}
 	for _, l := range t.leaves {
-		if c, ok := l.runObject.(*controllerInfo); ok {
+		if c, ok := l.runObject.(*ControllerInfo); ok {
 			if !strings.HasPrefix(c.pattern, prefix) {
 				c.pattern = prefix + c.pattern
 			}
 		}
 	}
-
 }
 
 // NSCond is Namespace Condition
@@ -284,16 +283,16 @@ func NSCond(cond namespaceCond) LinkNamespace {
 }
 
 // NSBefore Namespace BeforeRouter filter
-func NSBefore(filiterList ...FilterFunc) LinkNamespace {
+func NSBefore(filterList ...FilterFunc) LinkNamespace {
 	return func(ns *Namespace) {
-		ns.Filter("before", filiterList...)
+		ns.Filter("before", filterList...)
 	}
 }
 
 // NSAfter add Namespace FinishRouter filter
-func NSAfter(filiterList ...FilterFunc) LinkNamespace {
+func NSAfter(filterList ...FilterFunc) LinkNamespace {
 	return func(ns *Namespace) {
-		ns.Filter("after", filiterList...)
+		ns.Filter("after", filterList...)
 	}
 }
 

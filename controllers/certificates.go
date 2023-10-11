@@ -1,26 +1,29 @@
 package controllers
 
 import (
-	"archive/zip"
+	"bytes"
 	"fmt"
-	"io"
-	"os"
+	"io/ioutil"
 	"path/filepath"
-	"time"
+	"text/template"
 
-	"github.com/adamwalach/go-openvpn/client/config"
-	"github.com/adamwalach/openvpn-web-ui/lib"
-	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/validation"
+	"github.com/d3vilh/openvpn-server-config/client/config"
+	"github.com/d3vilh/openvpn-web-ui/lib"
+	"github.com/d3vilh/openvpn-web-ui/models"
+	"github.com/d3vilh/openvpn-web-ui/state"
 )
 
 type NewCertParams struct {
-	Name string `form:"Name" valid:"Required;"`
+	Name       string `form:"Name" valid:"Required;"`
+	Staticip   string `form:"staticip"`
+	Passphrase string `form:"passphrase"`
 }
 
 type CertificatesController struct {
 	BaseController
+	ConfigDir string
 }
 
 func (c *CertificatesController) NestPrepare() {
@@ -36,51 +39,26 @@ func (c *CertificatesController) NestPrepare() {
 // @router /certificates/:key [get]
 func (c *CertificatesController) Download() {
 	name := c.GetString(":key")
-	filename := fmt.Sprintf("%s.zip", name)
+	filename := fmt.Sprintf("%s.ovpn", name)
 
-	c.Ctx.Output.Header("Content-Type", "application/zip")
+	c.Ctx.Output.Header("Content-Type", "application/octet-stream")
 	c.Ctx.Output.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
 
-	zw := zip.NewWriter(c.Controller.Ctx.ResponseWriter)
+	keysPath := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/issued")
 
-	keysPath := models.GlobalCfg.OVConfigPath + "keys/"
-	if cfgPath, err := saveClientConfig(name); err == nil {
-		addFileToZip(zw, cfgPath)
-	}
-	addFileToZip(zw, keysPath+"ca.crt")
-	addFileToZip(zw, keysPath+name+".crt")
-	addFileToZip(zw, keysPath+name+".key")
-
-	if err := zw.Close(); err != nil {
-		beego.Error(err)
-	}
-}
-
-func addFileToZip(zw *zip.Writer, path string) error {
-	header := &zip.FileHeader{
-		Name:         filepath.Base(path),
-		Method:       zip.Store,
-		ModifiedTime: uint16(time.Now().UnixNano()),
-		ModifiedDate: uint16(time.Now().UnixNano()),
-	}
-	fi, err := os.Open(path)
+	cfgPath, err := c.saveClientConfig(keysPath, name)
 	if err != nil {
 		beego.Error(err)
-		return err
+		return
 	}
-
-	fw, err := zw.CreateHeader(header)
+	data, err := ioutil.ReadFile(cfgPath)
 	if err != nil {
 		beego.Error(err)
-		return err
+		return
 	}
-
-	if _, err = io.Copy(fw, fi); err != nil {
+	if _, err = c.Controller.Ctx.ResponseWriter.Write(data); err != nil {
 		beego.Error(err)
-		return err
 	}
-
-	return fi.Close()
 }
 
 // @router /certificates [get]
@@ -90,7 +68,7 @@ func (c *CertificatesController) Get() {
 }
 
 func (c *CertificatesController) showCerts() {
-	path := models.GlobalCfg.OVConfigPath + "keys/index.txt"
+	path := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/index.txt")
 	certs, err := lib.ReadCerts(path)
 	if err != nil {
 		beego.Error(err)
@@ -113,12 +91,55 @@ func (c *CertificatesController) Post() {
 		if vMap := validateCertParams(cParams); vMap != nil {
 			c.Data["validation"] = vMap
 		} else {
-			if err := lib.CreateCertificate(cParams.Name); err != nil {
+			if err := lib.CreateCertificate(cParams.Name, cParams.Staticip, cParams.Passphrase); err != nil {
 				beego.Error(err)
 				flash.Error(err.Error())
 				flash.Store(&c.Controller)
+			} else {
+				flash.Success("Success! Certificate for the name \"" + cParams.Name + "\" has been created")
+				flash.Store(&c.Controller)
 			}
 		}
+	}
+	c.showCerts()
+}
+
+// @router /certificates/revoke/:key [get]
+func (c *CertificatesController) Revoke() {
+	c.TplName = "certificates.html"
+	flash := beego.NewFlash()
+	name := c.GetString(":key")
+	if err := lib.RevokeCertificate(name); err != nil {
+		beego.Error(err)
+		//flash.Error(err.Error())
+		//flash.Store(&c.Controller)
+	} else {
+		flash.Warning("Success! Certificate for the name \"" + name + "\" has been revoked")
+		flash.Store(&c.Controller)
+	}
+	c.showCerts()
+}
+
+// @router /certificates/restart [get]
+func (c *CertificatesController) Restart() {
+	lib.Restart()
+	c.Redirect(c.URLFor("CertificatesController.Get"), 302)
+	return
+}
+
+// @router /certificates/burn/:key/:serial [get]
+func (c *CertificatesController) Burn() {
+	c.TplName = "certificates.html"
+	flash := beego.NewFlash()
+	CN := c.GetString(":key")
+	serial := c.GetString(":serial")
+	if err := lib.BurnCertificate(CN, serial); err != nil {
+		beego.Error(err)
+		//flash.Error(err.Error())
+		//flash.Store(&c.Controller)
+	} else {
+		flash.Success("Success! Certificate for the name \"" + CN + "\" has been removed")
+		flash.Store(&c.Controller)
 	}
 	c.showCerts()
 }
@@ -136,25 +157,67 @@ func validateCertParams(cert NewCertParams) map[string]map[string]string {
 	return nil
 }
 
-func saveClientConfig(name string) (string, error) {
+func (c *CertificatesController) saveClientConfig(keysPath string, name string) (string, error) {
 	cfg := config.New()
-	cfg.ServerAddress = models.GlobalCfg.ServerAddress
-	cfg.Cert = name + ".crt"
-	cfg.Key = name + ".key"
+	keysPathCa := filepath.Join(state.GlobalCfg.OVConfigPath, "pki")
+	cfg.ServerAddress = state.GlobalCfg.ServerAddress
+	ca, err := ioutil.ReadFile(filepath.Join(keysPathCa, "ca.crt"))
+	if err != nil {
+		return "", err
+	}
+	cfg.Ca = string(ca)
+	cert, err := ioutil.ReadFile(filepath.Join(keysPath, name+".crt"))
+	if err != nil {
+		return "", err
+	}
+	cfg.Cert = string(cert)
+	keysPathKey := filepath.Join(state.GlobalCfg.OVConfigPath, "pki/private")
+	key, err := ioutil.ReadFile(filepath.Join(keysPathKey, name+".key"))
+	if err != nil {
+		return "", err
+	}
+	cfg.Key = string(key)
 	serverConfig := models.OVConfig{Profile: "default"}
-	serverConfig.Read("Profile")
+	_ = serverConfig.Read("Profile")
 	cfg.Port = serverConfig.Port
 	cfg.Proto = serverConfig.Proto
 	cfg.Auth = serverConfig.Auth
 	cfg.Cipher = serverConfig.Cipher
 	cfg.Keysize = serverConfig.Keysize
 
-	destPath := models.GlobalCfg.OVConfigPath + "keys/" + name + ".conf"
-	if err := config.SaveToFile("conf/openvpn-client-config.tpl",
-		cfg, destPath); err != nil {
+	destPath := filepath.Join(state.GlobalCfg.OVConfigPath, "clients", name+".ovpn")
+	if err := SaveToFile(filepath.Join(c.ConfigDir, "openvpn-client-config.tpl"), cfg, destPath); err != nil {
 		beego.Error(err)
 		return "", err
 	}
 
 	return destPath, nil
+}
+
+func GetText(tpl string, c config.Config) (string, error) {
+	t := template.New("config")
+	t, err := t.Parse(tpl)
+	if err != nil {
+		return "", err
+	}
+	buf := new(bytes.Buffer)
+	err = t.Execute(buf, c)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func SaveToFile(tplPath string, c config.Config, destPath string) error {
+	tpl, err := ioutil.ReadFile(tplPath)
+	if err != nil {
+		return err
+	}
+
+	str, err := GetText(string(tpl), c)
+	if err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(destPath, []byte(str), 0644)
 }

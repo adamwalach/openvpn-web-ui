@@ -2,17 +2,16 @@ package controllers
 
 import (
 	"encoding/json"
-
-	mi "github.com/adamwalach/go-openvpn/server/mi"
-	"github.com/adamwalach/openvpn-web-ui/models"
+	mi "github.com/d3vilh/openvpn-server-config/server/mi"
+	"github.com/d3vilh/openvpn-web-ui/state"
 )
 
-//APISessionController manages vpn sessions
+// APISessionController manages vpn sessions
 type APISessionController struct {
 	APIBaseController
 }
 
-//KillParams contains CommonName of session to kill
+// KillParams contains CommonName of session to kill
 type KillParams struct {
 	Cname string `json:"cname"`
 }
@@ -24,7 +23,7 @@ type KillParams struct {
 // @Failure 400 request failure
 // @router / [get]
 func (c *APISessionController) Get() {
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	status, err := client.GetStatus()
 	if err != nil {
 		c.ServeJSONError(err.Error())
@@ -41,7 +40,7 @@ func (c *APISessionController) Get() {
 // @Failure 400 request failure
 // @router / [delete]
 func (c *APISessionController) Kill() {
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	p := KillParams{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &p); err != nil {
 		c.ServeJSONError(err.Error())

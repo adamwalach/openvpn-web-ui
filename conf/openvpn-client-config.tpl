@@ -1,18 +1,27 @@
-dev tun
+client
+dev {{ .Device }}
+proto {{ .Proto}}
+remote {{ .ServerAddress }} {{ .ClientPort }} {{ .Proto }}
+resolv-retry infinite
+user nobody
+group nogroup
 persist-tun
 persist-key
-client
-resolv-retry infinite
-remote {{ .ServerAddress }} {{ .Port }} {{ .Proto }}
-lport 0
-
+remote-cert-tls server
 cipher {{ .Cipher }}
-keysize {{ .Keysize }}
+keysize 256
 auth {{ .Auth }}
+auth-nocache
 tls-client
-
-ca {{ .Ca }}
-cert {{ .Cert }}
-key {{ .Key }}
-
+redirect-gateway def1
 comp-lzo
+verb 3
+<ca>
+{{ .Ca }}
+</ca>
+<cert>
+{{ .Cert }}
+</cert>
+<key>
+{{ .Key }}
+</key>

@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"github.com/adamwalach/openvpn-web-ui/lib"
-	"github.com/adamwalach/openvpn-web-ui/models"
+	"fmt"
 	"github.com/astaxie/beego"
-
-	mi "github.com/adamwalach/go-openvpn/server/mi"
+	mi "github.com/d3vilh/openvpn-server-config/server/mi"
+	"github.com/d3vilh/openvpn-web-ui/lib"
+	"github.com/d3vilh/openvpn-web-ui/state"
 )
 
 type MainController struct {
@@ -25,10 +25,12 @@ func (c *MainController) NestPrepare() {
 func (c *MainController) Get() {
 	c.Data["sysinfo"] = lib.GetSystemInfo()
 	lib.Dump(lib.GetSystemInfo())
-	client := mi.NewClient(models.GlobalCfg.MINetwork, models.GlobalCfg.MIAddress)
+	client := mi.NewClient(state.GlobalCfg.MINetwork, state.GlobalCfg.MIAddress)
 	status, err := client.GetStatus()
 	if err != nil {
 		beego.Error(err)
+		beego.Warn(fmt.Sprintf("passed client line: %s", client))
+		beego.Warn(fmt.Sprintf("error: %s", err))
 	} else {
 		c.Data["ovstatus"] = status
 	}

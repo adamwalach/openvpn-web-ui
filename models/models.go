@@ -1,28 +1,24 @@
 package models
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 
-	"github.com/adamwalach/go-openvpn/server/config"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	passlib "gopkg.in/hlandau/passlib.v1"
+	"github.com/d3vilh/openvpn-server-config/server/config"
+	"gopkg.in/hlandau/passlib.v1"
 )
 
-var GlobalCfg Settings
-
-func init() {
-	initDB()
-	createDefaultUsers()
-	createDefaultSettings()
-	createDefaultOVConfig()
-}
-
-func initDB() {
-	orm.RegisterDriver("sqlite3", orm.DRSqlite)
+func InitDB() {
+	err := orm.RegisterDriver("sqlite3", orm.DRSqlite)
+	if err != nil {
+		panic(err)
+	}
 	dbSource := "file:" + beego.AppConfig.String("dbPath")
 
-	err := orm.RegisterDataBase("default", "sqlite3", dbSource)
+	err = orm.RegisterDataBase("default", "sqlite3", dbSource)
 	if err != nil {
 		panic(err)
 	}
@@ -33,28 +29,21 @@ func initDB() {
 		new(OVConfig),
 	)
 
-	// Database alias.
-	name := "default"
-	// Drop table and re-create.
-	force := false
-	// Print log.
-	verbose := true
-
-	err = orm.RunSyncdb(name, force, verbose)
+	err = orm.RunSyncdb("default", false, true)
 	if err != nil {
 		beego.Error(err)
 		return
 	}
 }
 
-func createDefaultUsers() {
-	hash, err := passlib.Hash("b3secure")
+func CreateDefaultUsers() {
+	hash, err := passlib.Hash(os.Getenv("OPENVPN_ADMIN_PASSWORD"))
 	if err != nil {
 		beego.Error("Unable to hash password", err)
 	}
 	user := User{
 		Id:       1,
-		Login:    "admin",
+		Login:    os.Getenv("OPENVPN_ADMIN_USERNAME"),
 		Name:     "Administrator",
 		Email:    "root@localhost",
 		Password: hash,
@@ -70,46 +59,49 @@ func createDefaultUsers() {
 
 }
 
-func createDefaultSettings() {
+func CreateDefaultSettings() (*Settings, error) {
 	s := Settings{
 		Profile:       "default",
-		MIAddress:     "openvpn:2080",
-		MINetwork:     "tcp",
-		ServerAddress: "127.0.0.1",
-		OVConfigPath:  "/etc/openvpn/",
+		MIAddress:     beego.AppConfig.String("OpenVpnManagementAddress"),
+		MINetwork:     beego.AppConfig.String("OpenVpnManagementNetwork"),
+		ServerAddress: beego.AppConfig.String("OpenVpnServerAddress"),
+		OVConfigPath:  beego.AppConfig.String("OpenVpnPath"),
 	}
 	o := orm.NewOrm()
 	if created, _, err := o.ReadOrCreate(&s, "Profile"); err == nil {
-		GlobalCfg = s
-
 		if created {
 			beego.Info("New settings profile created")
 		} else {
 			beego.Debug(s)
 		}
+		return &s, nil
 	} else {
-		beego.Error(err)
+		return nil, err
 	}
 }
 
-func createDefaultOVConfig() {
+func CreateDefaultOVConfig(configDir string, ovConfigPath string, address string, network string) {
 	c := OVConfig{
 		Profile: "default",
 		Config: config.Config{
+			Device:              "tun",
 			Port:                1194,
+			ClientPort:          12235,
 			Proto:               "udp",
+			DNSServer1:          "# push \"dhcp-option DNS 8.8.8.8\"",
+			DNSServer2:          "# push \"dhcp-option DNS 1.0.0.1\"",
 			Cipher:              "AES-256-CBC",
 			Keysize:             256,
-			Auth:                "SHA256",
-			Dh:                  "dh2048.pem",
+			Auth:                "SHA512",
+			Dh:                  "pki/dh.pem",
 			Keepalive:           "10 120",
-			IfconfigPoolPersist: "ipp.txt",
-			Management:          "0.0.0.0 2080",
+			IfconfigPoolPersist: "pki/ipp.txt",
+			Management:          fmt.Sprintf("%s %s", address, network),
 			MaxClients:          100,
-			Server:              "10.8.0.0 255.255.255.0",
-			Ca:                  "keys/ca.crt",
-			Cert:                "keys/server.crt",
-			Key:                 "keys/server.key",
+			Server:              "10.0.70.0 255.255.255.0",
+			Ca:                  "pki/ca.crt",
+			Cert:                "pki/issued/server.crt",
+			Key:                 "pki/private/server.key",
 		},
 	}
 	o := orm.NewOrm()
@@ -119,11 +111,9 @@ func createDefaultOVConfig() {
 		} else {
 			beego.Debug(c)
 		}
-		path := GlobalCfg.OVConfigPath + "/server.conf"
-		if _, err = os.Stat(path); os.IsNotExist(err) {
-			destPath := GlobalCfg.OVConfigPath + "/server.conf"
-			if err = config.SaveToFile("conf/openvpn-server-config.tpl",
-				c.Config, destPath); err != nil {
+		serverConfig := filepath.Join(ovConfigPath, "config/server.conf")
+		if _, err = os.Stat(serverConfig); os.IsNotExist(err) {
+			if err = config.SaveToFile(filepath.Join(configDir, "openvpn-server-config.tpl"), c.Config, serverConfig); err != nil {
 				beego.Error(err)
 			}
 		}

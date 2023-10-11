@@ -11,7 +11,7 @@ import (
 	"github.com/astaxie/beego/session"
 )
 
-//
+// register MIME type with content type
 func registerMime() error {
 	for k, v := range mimemaps {
 		mime.AddExtensionType(k, v)
@@ -32,6 +32,9 @@ func registerDefaultErrorHandler() error {
 		"502": badGateway,
 		"503": serviceUnavailable,
 		"504": gatewayTimeout,
+		"417": invalidxsrf,
+		"422": missingxsrf,
+		"413": payloadTooLarge,
 	}
 	for e, h := range m {
 		if _, ok := ErrorMaps[e]; !ok {
@@ -55,9 +58,10 @@ func registerSession() error {
 			conf.ProviderConfig = filepath.ToSlash(BConfig.WebConfig.Session.SessionProviderConfig)
 			conf.DisableHTTPOnly = BConfig.WebConfig.Session.SessionDisableHTTPOnly
 			conf.Domain = BConfig.WebConfig.Session.SessionDomain
-			conf.EnableSidInHttpHeader = BConfig.WebConfig.Session.SessionEnableSidInHTTPHeader
-			conf.SessionNameInHttpHeader = BConfig.WebConfig.Session.SessionNameInHTTPHeader
-			conf.EnableSidInUrlQuery = BConfig.WebConfig.Session.SessionEnableSidInURLQuery
+			conf.EnableSidInHTTPHeader = BConfig.WebConfig.Session.SessionEnableSidInHTTPHeader
+			conf.SessionNameInHTTPHeader = BConfig.WebConfig.Session.SessionNameInHTTPHeader
+			conf.EnableSidInURLQuery = BConfig.WebConfig.Session.SessionEnableSidInURLQuery
+			conf.CookieSameSite = BConfig.WebConfig.Session.SessionCookieSameSite
 		} else {
 			if err = json.Unmarshal([]byte(sessionConfig), conf); err != nil {
 				return err
@@ -72,7 +76,8 @@ func registerSession() error {
 }
 
 func registerTemplate() error {
-	if err := BuildTemplate(BConfig.WebConfig.ViewsPath); err != nil {
+	defer lockViewPaths()
+	if err := AddViewPath(BConfig.WebConfig.ViewsPath); err != nil {
 		if BConfig.RunMode == DEV {
 			logs.Warn(err)
 		}

@@ -1,9 +1,9 @@
-management {{ .Management }}
+management 0.0.0.0 2080
 
 port {{ .Port }}
 proto {{ .Proto }}
 
-dev tun
+dev {{ .Device }}
 
 ca {{ .Ca }}
 cert {{ .Cert }}
@@ -14,21 +14,36 @@ keysize {{ .Keysize }}
 auth {{ .Auth }}
 dh {{ .Dh }}
 
-server 10.8.0.0 255.255.255.0
+server {{ .Server }}}
+route {{ .Route }}
 ifconfig-pool-persist {{ .IfconfigPoolPersist }}
-push "route 10.8.0.0 255.255.255.0"
-push "dhcp-option DNS 8.8.8.8"
-push "dhcp-option DNS 8.8.4.4"
+push  {{ .PushRoute }}
+push {{ .DNSServer1 }}
+push {{ .DNSServer2 }}
 
 keepalive {{ .Keepalive }}
-
 comp-lzo
 max-clients {{ .MaxClients }}
 
 persist-key
 persist-tun
 
-log         openvpn.log
-verb 3
+log         /var/log/openvpn/openvpn.log
+verb 4
+topology subnet
+route 10.0.71.0 255.255.255.0
 
-mute 10
+client-config-dir /etc/openvpn/staticclients
+push "redirect-gateway def1 bypass-dhcp"
+
+ncp-ciphers AES-256-GCM:AES-192-GCM:AES-128-GCM
+
+user nobody
+group nogroup
+
+status /var/log/openvpn/openvpn-status.log
+explicit-exit-notify 1
+crl-verify pki/crl.pem
+
+#auto generated
+

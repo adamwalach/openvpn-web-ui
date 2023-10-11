@@ -1,16 +1,24 @@
 // Package passlib provides a simple password hashing and verification
 // interface abstracting multiple password hashing schemes.
 //
-// Most people need concern themselves only with the functions Hash
-// and Verify, which uses the default context and sensible defaults.
+// After initialisation, most people need concern themselves only with the
+// functions Hash and Verify, which uses the default context and sensible
+// defaults.
+//
+// Library Initialization
+//
+// You should initialise the library before using it with the following line.
+//
+//   // Call this at application startup.
+//   passlib.UseDefaults(passlib.Defaults20180601)
+//
+// See func UseDefaults for details.
 package passlib // import "gopkg.in/hlandau/passlib.v1"
 
-import "gopkg.in/hlandau/passlib.v1/abstract"
-import "gopkg.in/hlandau/passlib.v1/hash/scrypt"
-import "gopkg.in/hlandau/passlib.v1/hash/sha2crypt"
-import "gopkg.in/hlandau/passlib.v1/hash/bcryptsha256"
-import "gopkg.in/hlandau/passlib.v1/hash/bcrypt"
-import "gopkg.in/hlandau/easymetric.v1/cexp"
+import (
+	"gopkg.in/hlandau/easymetric.v1/cexp"
+	"gopkg.in/hlandau/passlib.v1/abstract"
+)
 
 var cHashCalls = cexp.NewCounter("passlib.ctx.hashCalls")
 var cVerifyCalls = cexp.NewCounter("passlib.ctx.verifyCalls")
@@ -18,17 +26,6 @@ var cSuccessfulVerifyCalls = cexp.NewCounter("passlib.ctx.successfulVerifyCalls"
 var cFailedVerifyCalls = cexp.NewCounter("passlib.ctx.failedVerifyCalls")
 var cSuccessfulVerifyCallsWithUpgrade = cexp.NewCounter("passlib.ctx.successfulVerifyCallsWithUpgrade")
 var cSuccessfulVerifyCallsDeferringUpgrade = cexp.NewCounter("passlib.ctx.successfulVerifyCallsDeferringUpgrade")
-
-// The default schemes, most preferred first. The first scheme will be used to
-// hash passwords, and any of the schemes may be used to verify existing
-// passwords. The contents of this value may change with subsequent releases.
-var DefaultSchemes = []abstract.Scheme{
-	scrypt.SHA256Crypter,
-	sha2crypt.Crypter256,
-	sha2crypt.Crypter512,
-	bcryptsha256.Crypter,
-	bcrypt.Crypter,
-}
 
 // A password hashing context, that uses a given set of schemes to hash and
 // verify passwords.

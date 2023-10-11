@@ -48,19 +48,3 @@ func Dump(obj interface{}) {
 	result, _ := json.MarshalIndent(obj, "", "\t")
 	beego.Debug(string(result))
 }
-
-//CopyStruct serializes src and tries to deserialize it to dst
-func CopyStruct(src interface{}, dst interface{}) error {
-	jsonString, err := json.Marshal(&src)
-	if err != nil {
-		beego.Error("Unable to marshal object")
-		return err
-	}
-
-	if err := json.Unmarshal([]byte(jsonString), &dst); err != nil {
-		beego.Error("Unable to unmarshal object")
-		return err
-	}
-
-	return nil
-}

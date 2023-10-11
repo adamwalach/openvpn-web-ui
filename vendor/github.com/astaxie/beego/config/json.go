@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -94,14 +95,16 @@ func (c *JSONConfigContainer) Int(key string) (int, error) {
 	if val != nil {
 		if v, ok := val.(float64); ok {
 			return int(v), nil
+		} else if v, ok := val.(string); ok {
+			return strconv.Atoi(v)
 		}
-		return 0, errors.New("not int value")
+		return 0, errors.New("not valid value")
 	}
 	return 0, errors.New("not exist key:" + key)
 }
 
 // DefaultInt returns the integer value for a given key.
-// if err != nil return defaltval
+// if err != nil return defaultval
 func (c *JSONConfigContainer) DefaultInt(key string, defaultval int) int {
 	if v, err := c.Int(key); err == nil {
 		return v
@@ -122,7 +125,7 @@ func (c *JSONConfigContainer) Int64(key string) (int64, error) {
 }
 
 // DefaultInt64 returns the int64 value for a given key.
-// if err != nil return defaltval
+// if err != nil return defaultval
 func (c *JSONConfigContainer) DefaultInt64(key string, defaultval int64) int64 {
 	if v, err := c.Int64(key); err == nil {
 		return v
@@ -143,7 +146,7 @@ func (c *JSONConfigContainer) Float(key string) (float64, error) {
 }
 
 // DefaultFloat returns the float64 value for a given key.
-// if err != nil return defaltval
+// if err != nil return defaultval
 func (c *JSONConfigContainer) DefaultFloat(key string, defaultval float64) float64 {
 	if v, err := c.Float(key); err == nil {
 		return v
@@ -163,7 +166,7 @@ func (c *JSONConfigContainer) String(key string) string {
 }
 
 // DefaultString returns the string value for a given key.
-// if err != nil return defaltval
+// if err != nil return defaultval
 func (c *JSONConfigContainer) DefaultString(key string, defaultval string) string {
 	// TODO FIXME should not use "" to replace non existence
 	if v := c.String(key); v != "" {
@@ -182,7 +185,7 @@ func (c *JSONConfigContainer) Strings(key string) []string {
 }
 
 // DefaultStrings returns the []string value for a given key.
-// if err != nil return defaltval
+// if err != nil return defaultval
 func (c *JSONConfigContainer) DefaultStrings(key string, defaultval []string) []string {
 	if v := c.Strings(key); v != nil {
 		return v

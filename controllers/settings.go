@@ -1,11 +1,12 @@
 package controllers
 
 import (
+	"github.com/d3vilh/openvpn-web-ui/state"
 	"html/template"
 
-	"github.com/adamwalach/openvpn-web-ui/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"github.com/d3vilh/openvpn-web-ui/models"
 )
 
 type SettingsController struct {
@@ -26,7 +27,7 @@ func (c *SettingsController) Get() {
 	c.TplName = "settings.html"
 	c.Data["xsrfdata"] = template.HTML(c.XSRFFormHTML())
 	settings := models.Settings{Profile: "default"}
-	settings.Read("Profile")
+	_ = settings.Read("Profile")
 	c.Data["Settings"] = &settings
 }
 
@@ -35,7 +36,7 @@ func (c *SettingsController) Post() {
 
 	flash := beego.NewFlash()
 	settings := models.Settings{Profile: "default"}
-	settings.Read("Profile")
+	_ = settings.Read("Profile")
 	if err := c.ParseForm(&settings); err != nil {
 		beego.Warning(err)
 		flash.Error(err.Error())
@@ -49,7 +50,7 @@ func (c *SettingsController) Post() {
 		flash.Error(err.Error())
 	} else {
 		flash.Success("Settings has been updated")
-		models.GlobalCfg = settings
+		state.GlobalCfg = settings
 	}
 	flash.Store(&c.Controller)
 }

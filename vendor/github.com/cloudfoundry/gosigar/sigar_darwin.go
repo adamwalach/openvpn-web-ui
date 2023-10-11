@@ -1,5 +1,3 @@
-// Copyright (c) 2012 VMware, Inc.
-
 package sigar
 
 /*
@@ -68,6 +66,10 @@ func (self *Mem) Get() error {
 	self.ActualUsed = self.Used - kern
 
 	return nil
+}
+
+func (self *Mem) GetIgnoringCGroups() error {
+	return self.Get()
 }
 
 type xsw_usage struct {

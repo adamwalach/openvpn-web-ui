@@ -78,30 +78,38 @@ var (
 	DefaultReadTimeOut time.Duration
 	// DefaultWriteTimeOut is the HTTP Write timeout
 	DefaultWriteTimeOut time.Duration
-	// DefaultMaxHeaderBytes is the Max HTTP Herder size, default is 0, no limit
+	// DefaultMaxHeaderBytes is the Max HTTP Header size, default is 0, no limit
 	DefaultMaxHeaderBytes int
 	// DefaultTimeout is the shutdown server's timeout. default is 60s
 	DefaultTimeout = 60 * time.Second
 
 	isChild     bool
 	socketOrder string
-	once        sync.Once
+
+	hookableSignals []os.Signal
 )
 
-func onceInit() {
-	regLock = &sync.Mutex{}
+func init() {
 	flag.BoolVar(&isChild, "graceful", false, "listen on open fd (after forking)")
 	flag.StringVar(&socketOrder, "socketorder", "", "previous initialization order - used when more than one listener was started")
+
+	regLock = &sync.Mutex{}
 	runningServers = make(map[string]*Server)
 	runningServersOrder = []string{}
 	socketPtrOffsetMap = make(map[string]uint)
+
+	hookableSignals = []os.Signal{
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+	}
 }
 
 // NewServer returns a new graceServer.
 func NewServer(addr string, handler http.Handler) (srv *Server) {
-	once.Do(onceInit)
 	regLock.Lock()
 	defer regLock.Unlock()
+
 	if !flag.Parsed() {
 		flag.Parse()
 	}
@@ -114,7 +122,6 @@ func NewServer(addr string, handler http.Handler) (srv *Server) {
 	}
 
 	srv = &Server{
-		wg:      sync.WaitGroup{},
 		sigChan: make(chan os.Signal),
 		isChild: isChild,
 		SignalHooks: map[int]map[os.Signal][]func(){
@@ -129,20 +136,21 @@ func NewServer(addr string, handler http.Handler) (srv *Server) {
 				syscall.SIGTERM: {},
 			},
 		},
-		state:   StateInit,
-		Network: "tcp",
+		state:        StateInit,
+		Network:      "tcp",
+		terminalChan: make(chan error), //no cache channel
 	}
-	srv.Server = &http.Server{}
-	srv.Server.Addr = addr
-	srv.Server.ReadTimeout = DefaultReadTimeOut
-	srv.Server.WriteTimeout = DefaultWriteTimeOut
-	srv.Server.MaxHeaderBytes = DefaultMaxHeaderBytes
-	srv.Server.Handler = handler
+	srv.Server = &http.Server{
+		Addr:           addr,
+		ReadTimeout:    DefaultReadTimeOut,
+		WriteTimeout:   DefaultWriteTimeOut,
+		MaxHeaderBytes: DefaultMaxHeaderBytes,
+		Handler:        handler,
+	}
 
 	runningServersOrder = append(runningServersOrder, addr)
 	runningServers[addr] = srv
-
-	return
+	return srv
 }
 
 // ListenAndServe refer http.ListenAndServe

@@ -25,6 +25,10 @@ import (
 const (
 	// ValidTag struct tag
 	ValidTag = "valid"
+
+	LabelTag = "label"
+
+	wordsize = 32 << (^uint(0) >> 32 & 1)
 )
 
 var (
@@ -43,6 +47,8 @@ var (
 		"Valid":     true,
 		"NoMatch":   true,
 	}
+	// ErrInt64On32 show 32 bit platform not support int64
+	ErrInt64On32 = fmt.Errorf("not support int64 on 32-bit platform")
 )
 
 func init() {
@@ -120,6 +126,7 @@ func isStructPtr(t reflect.Type) bool {
 
 func getValidFuncs(f reflect.StructField) (vfs []ValidFunc, err error) {
 	tag := f.Tag.Get(ValidTag)
+	label := f.Tag.Get(LabelTag)
 	if len(tag) == 0 {
 		return
 	}
@@ -132,7 +139,7 @@ func getValidFuncs(f reflect.StructField) (vfs []ValidFunc, err error) {
 		if len(vfunc) == 0 {
 			continue
 		}
-		vf, err = parseFunc(vfunc, f.Name)
+		vf, err = parseFunc(vfunc, f.Name, label)
 		if err != nil {
 			return
 		}
@@ -164,7 +171,7 @@ func getRegFuncs(tag, key string) (vfs []ValidFunc, str string, err error) {
 	return
 }
 
-func parseFunc(vfunc, key string) (v ValidFunc, err error) {
+func parseFunc(vfunc, key string, label string) (v ValidFunc, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
@@ -184,7 +191,7 @@ func parseFunc(vfunc, key string) (v ValidFunc, err error) {
 			err = fmt.Errorf("%s require %d parameters", vfunc, num)
 			return
 		}
-		v = ValidFunc{vfunc, []interface{}{key + "." + vfunc}}
+		v = ValidFunc{vfunc, []interface{}{key + "." + vfunc + "." + label}}
 		return
 	}
 
@@ -206,7 +213,7 @@ func parseFunc(vfunc, key string) (v ValidFunc, err error) {
 		return
 	}
 
-	tParams, err := trim(name, key+"."+name, params)
+	tParams, err := trim(name, key+"."+name+"."+label, params)
 	if err != nil {
 		return
 	}
@@ -217,7 +224,7 @@ func parseFunc(vfunc, key string) (v ValidFunc, err error) {
 func numIn(name string) (num int, err error) {
 	fn, ok := funcs[name]
 	if !ok {
-		err = fmt.Errorf("doesn't exsits %s valid function", name)
+		err = fmt.Errorf("doesn't exists %s valid function", name)
 		return
 	}
 	// sub *Validation obj and key
@@ -229,7 +236,7 @@ func trim(name, key string, s []string) (ts []interface{}, err error) {
 	ts = make([]interface{}, len(s), len(s)+1)
 	fn, ok := funcs[name]
 	if !ok {
-		err = fmt.Errorf("doesn't exsits %s valid function", name)
+		err = fmt.Errorf("doesn't exists %s valid function", name)
 		return
 	}
 	for i := 0; i < len(s); i++ {
@@ -249,16 +256,39 @@ func parseParam(t reflect.Type, s string) (i interface{}, err error) {
 	switch t.Kind() {
 	case reflect.Int:
 		i, err = strconv.Atoi(s)
+	case reflect.Int64:
+		if wordsize == 32 {
+			return nil, ErrInt64On32
+		}
+		i, err = strconv.ParseInt(s, 10, 64)
+	case reflect.Int32:
+		var v int64
+		v, err = strconv.ParseInt(s, 10, 32)
+		if err == nil {
+			i = int32(v)
+		}
+	case reflect.Int16:
+		var v int64
+		v, err = strconv.ParseInt(s, 10, 16)
+		if err == nil {
+			i = int16(v)
+		}
+	case reflect.Int8:
+		var v int64
+		v, err = strconv.ParseInt(s, 10, 8)
+		if err == nil {
+			i = int8(v)
+		}
 	case reflect.String:
 		i = s
 	case reflect.Ptr:
 		if t.Elem().String() != "regexp.Regexp" {
-			err = fmt.Errorf("does not support %s", t.Elem().String())
+			err = fmt.Errorf("not support %s", t.Elem().String())
 			return
 		}
 		i, err = regexp.Compile(s)
 	default:
-		err = fmt.Errorf("does not support %s", t.Kind().String())
+		err = fmt.Errorf("not support %s", t.Kind().String())
 	}
 	return
 }

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"runtime/debug"
 	"strings"
 )
 
@@ -75,7 +76,7 @@ func registerModel(PrefixOrSuffix string, model interface{}, isPrefix bool) {
 		}
 
 		if mi.fields.pk == nil {
-			fmt.Printf("<orm.RegisterModel> `%s` need a primary key field, default use 'id' if not set\n", name)
+			fmt.Printf("<orm.RegisterModel> `%s` needs a primary key field, default is to use 'id' if not set\n", name)
 			os.Exit(2)
 		}
 
@@ -89,7 +90,7 @@ func registerModel(PrefixOrSuffix string, model interface{}, isPrefix bool) {
 	modelCache.set(table, mi)
 }
 
-// boostrap models
+// bootstrap models
 func bootStrap() {
 	if modelCache.done {
 		return
@@ -117,7 +118,7 @@ func bootStrap() {
 				name := getFullName(elm)
 				mii, ok := modelCache.getByFullName(name)
 				if !ok || mii.pkg != elm.PkgPath() {
-					err = fmt.Errorf("can not found rel in field `%s`, `%s` may be miss register", fi.fullName, elm.String())
+					err = fmt.Errorf("can not find rel in field `%s`, `%s` may be miss register", fi.fullName, elm.String())
 					goto end
 				}
 				fi.relModelInfo = mii
@@ -128,7 +129,7 @@ func bootStrap() {
 						if i := strings.LastIndex(fi.relThrough, "."); i != -1 && len(fi.relThrough) > (i+1) {
 							pn := fi.relThrough[:i]
 							rmi, ok := modelCache.getByFullName(fi.relThrough)
-							if ok == false || pn != rmi.pkg {
+							if !ok || pn != rmi.pkg {
 								err = fmt.Errorf("field `%s` wrong rel_through value `%s` cannot find table", fi.fullName, fi.relThrough)
 								goto end
 							}
@@ -171,7 +172,7 @@ func bootStrap() {
 						break
 					}
 				}
-				if inModel == false {
+				if !inModel {
 					rmi := fi.relModelInfo
 					ffi := new(fieldInfo)
 					ffi.name = mi.name
@@ -185,7 +186,7 @@ func bootStrap() {
 					} else {
 						ffi.fieldType = RelReverseMany
 					}
-					if rmi.fields.Add(ffi) == false {
+					if !rmi.fields.Add(ffi) {
 						added := false
 						for cnt := 0; cnt < 5; cnt++ {
 							ffi.name = fmt.Sprintf("%s%d", mi.name, cnt)
@@ -195,7 +196,7 @@ func bootStrap() {
 								break
 							}
 						}
-						if added == false {
+						if !added {
 							panic(fmt.Errorf("cannot generate auto reverse field info `%s` to `%s`", fi.fullName, ffi.fullName))
 						}
 					}
@@ -248,7 +249,7 @@ func bootStrap() {
 						break mForA
 					}
 				}
-				if found == false {
+				if !found {
 					err = fmt.Errorf("reverse field `%s` not found in model `%s`", fi.fullName, fi.relModelInfo.fullName)
 					goto end
 				}
@@ -267,7 +268,7 @@ func bootStrap() {
 						break mForB
 					}
 				}
-				if found == false {
+				if !found {
 				mForC:
 					for _, ffi := range fi.relModelInfo.fields.fieldsByType[RelManyToMany] {
 						conditions := fi.relThrough != "" && fi.relThrough == ffi.relThrough ||
@@ -287,7 +288,7 @@ func bootStrap() {
 						}
 					}
 				}
-				if found == false {
+				if !found {
 					err = fmt.Errorf("reverse field for `%s` not found in model `%s`", fi.fullName, fi.relModelInfo.fullName)
 					goto end
 				}
@@ -298,6 +299,7 @@ func bootStrap() {
 end:
 	if err != nil {
 		fmt.Println(err)
+		debug.PrintStack()
 		os.Exit(2)
 	}
 }
@@ -332,14 +334,14 @@ func RegisterModelWithSuffix(suffix string, models ...interface{}) {
 	}
 }
 
-// BootStrap bootrap models.
+// BootStrap bootstrap models.
 // make all model parsed and can not add more models
 func BootStrap() {
+	modelCache.Lock()
+	defer modelCache.Unlock()
 	if modelCache.done {
 		return
 	}
-	modelCache.Lock()
-	defer modelCache.Unlock()
 	bootStrap()
 	modelCache.done = true
 }

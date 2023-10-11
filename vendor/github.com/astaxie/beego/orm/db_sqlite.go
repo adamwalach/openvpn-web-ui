@@ -17,6 +17,8 @@ package orm
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
+	"time"
 )
 
 // sqlite operators.
@@ -43,6 +45,7 @@ var sqliteTypes = map[string]string{
 	"pk":              "NOT NULL PRIMARY KEY",
 	"bool":            "bool",
 	"string":          "varchar(%d)",
+	"string-char":     "character(%d)",
 	"string-text":     "text",
 	"time.Time-date":  "date",
 	"time.Time":       "datetime",
@@ -64,6 +67,14 @@ type dbBaseSqlite struct {
 }
 
 var _ dbBaser = new(dbBaseSqlite)
+
+// override base db read for update behavior as SQlite does not support syntax
+func (d *dbBaseSqlite) Read(q dbQuerier, mi *modelInfo, ind reflect.Value, tz *time.Location, cols []string, isForUpdate bool) error {
+	if isForUpdate {
+		DebugLog.Println("[WARN] SQLite does not support SELECT FOR UPDATE query, isForUpdate param is ignored and always as false to do the work")
+	}
+	return d.dbBase.Read(q, mi, ind, tz, cols, false)
+}
 
 // get sqlite operator.
 func (d *dbBaseSqlite) OperatorSQL(operator string) string {
@@ -134,7 +145,7 @@ func (d *dbBaseSqlite) IndexExists(db dbQuerier, table string, name string) bool
 	defer rows.Close()
 	for rows.Next() {
 		var tmp, index sql.NullString
-		rows.Scan(&tmp, &index, &tmp)
+		rows.Scan(&tmp, &index, &tmp, &tmp, &tmp)
 		if name == index.String {
 			return true
 		}

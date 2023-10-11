@@ -22,10 +22,11 @@ import (
 
 // mysql operators.
 var mysqlOperators = map[string]string{
-	"exact":     "= ?",
-	"iexact":    "LIKE ?",
-	"contains":  "LIKE BINARY ?",
-	"icontains": "LIKE ?",
+	"exact":       "= ?",
+	"iexact":      "LIKE ?",
+	"strictexact": "= BINARY ?",
+	"contains":    "LIKE BINARY ?",
+	"icontains":   "LIKE ?",
 	// "regex":       "REGEXP BINARY ?",
 	// "iregex":      "REGEXP ?",
 	"gt":          "> ?",
@@ -46,6 +47,7 @@ var mysqlTypes = map[string]string{
 	"pk":              "NOT NULL PRIMARY KEY",
 	"bool":            "bool",
 	"string":          "varchar(%d)",
+	"string-char":     "char(%d)",
 	"string-text":     "longtext",
 	"time.Time-date":  "date",
 	"time.Time":       "datetime",
@@ -103,8 +105,7 @@ func (d *dbBaseMysql) IndexExists(db dbQuerier, table string, name string) bool 
 // If no will insert
 // Add "`" for mysql sql building
 func (d *dbBaseMysql) InsertOrUpdate(q dbQuerier, mi *modelInfo, ind reflect.Value, a *alias, args ...string) (int64, error) {
-
-	iouStr := ""
+	var iouStr string
 	argsMap := map[string]string{}
 
 	iouStr = "ON DUPLICATE KEY UPDATE"

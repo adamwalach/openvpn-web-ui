@@ -28,6 +28,7 @@ import (
 
 	"github.com/astaxie/beego/context"
 	"github.com/astaxie/beego/logs"
+	"github.com/hashicorp/golang-lru"
 )
 
 var errNotStaticRequest = errors.New("request not a static file request")
@@ -67,6 +68,10 @@ func serverStaticRouter(ctx *context.Context) {
 			http.ServeFile(ctx.ResponseWriter, ctx.Request, filePath)
 		}
 		return
+	} else if fileInfo.Size() > int64(BConfig.WebConfig.StaticCacheFileSize) {
+		//over size file serve with http module
+		http.ServeFile(ctx.ResponseWriter, ctx.Request, filePath)
+		return
 	}
 
 	var enableCompress = BConfig.EnableGzip && isStaticCompress(filePath)
@@ -74,7 +79,7 @@ func serverStaticRouter(ctx *context.Context) {
 	if enableCompress {
 		acceptEncoding = context.ParseEncoding(ctx.Request)
 	}
-	b, n, sch, err := openFile(filePath, fileInfo, acceptEncoding)
+	b, n, sch, reader, err := openFile(filePath, fileInfo, acceptEncoding)
 	if err != nil {
 		if BConfig.RunMode == DEV {
 			logs.Warn("Can't compress the file:", filePath, err)
@@ -89,56 +94,79 @@ func serverStaticRouter(ctx *context.Context) {
 		ctx.Output.Header("Content-Length", strconv.FormatInt(sch.size, 10))
 	}
 
-	http.ServeContent(ctx.ResponseWriter, ctx.Request, filePath, sch.modTime, sch)
-	return
-
+	http.ServeContent(ctx.ResponseWriter, ctx.Request, filePath, sch.modTime, reader)
 }
 
 type serveContentHolder struct {
+	data       []byte
+	modTime    time.Time
+	size       int64
+	originSize int64 //original file size:to judge file changed
+	encoding   string
+}
+
+type serveContentReader struct {
 	*bytes.Reader
-	modTime  time.Time
-	size     int64
-	encoding string
 }
 
 var (
-	staticFileMap = make(map[string]*serveContentHolder)
-	mapLock       sync.RWMutex
+	staticFileLruCache *lru.Cache
+	lruLock            sync.RWMutex
 )
 
-func openFile(filePath string, fi os.FileInfo, acceptEncoding string) (bool, string, *serveContentHolder, error) {
-	mapKey := acceptEncoding + ":" + filePath
-	mapLock.RLock()
-	mapFile, _ := staticFileMap[mapKey]
-	mapLock.RUnlock()
-	if isOk(mapFile, fi) {
-		return mapFile.encoding != "", mapFile.encoding, mapFile, nil
+func openFile(filePath string, fi os.FileInfo, acceptEncoding string) (bool, string, *serveContentHolder, *serveContentReader, error) {
+	if staticFileLruCache == nil {
+		//avoid lru cache error
+		if BConfig.WebConfig.StaticCacheFileNum >= 1 {
+			staticFileLruCache, _ = lru.New(BConfig.WebConfig.StaticCacheFileNum)
+		} else {
+			staticFileLruCache, _ = lru.New(1)
+		}
 	}
-	mapLock.Lock()
-	defer mapLock.Unlock()
-	if mapFile, _ = staticFileMap[mapKey]; !isOk(mapFile, fi) {
+	mapKey := acceptEncoding + ":" + filePath
+	lruLock.RLock()
+	var mapFile *serveContentHolder
+	if cacheItem, ok := staticFileLruCache.Get(mapKey); ok {
+		mapFile = cacheItem.(*serveContentHolder)
+	}
+	lruLock.RUnlock()
+	if isOk(mapFile, fi) {
+		reader := &serveContentReader{Reader: bytes.NewReader(mapFile.data)}
+		return mapFile.encoding != "", mapFile.encoding, mapFile, reader, nil
+	}
+	lruLock.Lock()
+	defer lruLock.Unlock()
+	if cacheItem, ok := staticFileLruCache.Get(mapKey); ok {
+		mapFile = cacheItem.(*serveContentHolder)
+	}
+	if !isOk(mapFile, fi) {
 		file, err := os.Open(filePath)
 		if err != nil {
-			return false, "", nil, err
+			return false, "", nil, nil, err
 		}
 		defer file.Close()
 		var bufferWriter bytes.Buffer
 		_, n, err := context.WriteFile(acceptEncoding, &bufferWriter, file)
 		if err != nil {
-			return false, "", nil, err
+			return false, "", nil, nil, err
 		}
-		mapFile = &serveContentHolder{Reader: bytes.NewReader(bufferWriter.Bytes()), modTime: fi.ModTime(), size: int64(bufferWriter.Len()), encoding: n}
-		staticFileMap[mapKey] = mapFile
+		mapFile = &serveContentHolder{data: bufferWriter.Bytes(), modTime: fi.ModTime(), size: int64(bufferWriter.Len()), originSize: fi.Size(), encoding: n}
+		if isOk(mapFile, fi) {
+			staticFileLruCache.Add(mapKey, mapFile)
+		}
 	}
 
-	return mapFile.encoding != "", mapFile.encoding, mapFile, nil
+	reader := &serveContentReader{Reader: bytes.NewReader(mapFile.data)}
+	return mapFile.encoding != "", mapFile.encoding, mapFile, reader, nil
 }
 
 func isOk(s *serveContentHolder, fi os.FileInfo) bool {
 	if s == nil {
 		return false
+	} else if s.size > int64(BConfig.WebConfig.StaticCacheFileSize) {
+		return false
 	}
-	return s.modTime == fi.ModTime() && s.size == fi.Size()
+	return s.modTime == fi.ModTime() && s.originSize == fi.Size()
 }
 
 // isStaticCompress detect static files
@@ -174,7 +202,7 @@ func searchFile(ctx *context.Context) (string, os.FileInfo, error) {
 		if !strings.Contains(requestPath, prefix) {
 			continue
 		}
-		if len(requestPath) > len(prefix) && requestPath[len(prefix)] != '/' {
+		if prefix != "/" && len(requestPath) > len(prefix) && requestPath[len(prefix)] != '/' {
 			continue
 		}
 		filePath := path.Join(staticDir, requestPath[len(prefix):])

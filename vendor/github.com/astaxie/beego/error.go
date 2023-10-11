@@ -93,11 +93,6 @@ func showErr(err interface{}, ctx *context.Context, stack string) {
 		"BeegoVersion":  VERSION,
 		"GoVersion":     runtime.Version(),
 	}
-	if ctx.Output.Status != 0 {
-		ctx.ResponseWriter.WriteHeader(ctx.Output.Status)
-	} else {
-		ctx.ResponseWriter.WriteHeader(500)
-	}
 	t.Execute(ctx.ResponseWriter, data)
 }
 
@@ -252,6 +247,30 @@ func forbidden(rw http.ResponseWriter, r *http.Request) {
 	)
 }
 
+// show 422 missing xsrf token
+func missingxsrf(rw http.ResponseWriter, r *http.Request) {
+	responseError(rw, r,
+		422,
+		"<br>The page you have requested is forbidden."+
+			"<br>Perhaps you are here because:"+
+			"<br><br><ul>"+
+			"<br>'_xsrf' argument missing from POST"+
+			"</ul>",
+	)
+}
+
+// show 417 invalid xsrf token
+func invalidxsrf(rw http.ResponseWriter, r *http.Request) {
+	responseError(rw, r,
+		417,
+		"<br>The page you have requested is forbidden."+
+			"<br>Perhaps you are here because:"+
+			"<br><br><ul>"+
+			"<br>expected XSRF not found"+
+			"</ul>",
+	)
+}
+
 // show 404 not found error.
 func notFound(rw http.ResponseWriter, r *http.Request) {
 	responseError(rw, r,
@@ -340,9 +359,23 @@ func gatewayTimeout(rw http.ResponseWriter, r *http.Request) {
 	)
 }
 
+// show 413 Payload Too Large
+func payloadTooLarge(rw http.ResponseWriter, r *http.Request) {
+	responseError(rw, r,
+		413,
+		`<br>The page you have requested is unavailable.
+		 <br>Perhaps you are here because:<br><br>
+		 <ul>
+			<br>The request entity is larger than limits defined by server.
+			<br>Please change the request entity and try again.
+		 </ul>
+		`,
+	)
+}
+
 func responseError(rw http.ResponseWriter, r *http.Request, errCode int, errContent string) {
 	t, _ := template.New("beegoerrortemp").Parse(errtpl)
-	data := map[string]interface{}{
+	data := M{
 		"Title":        http.StatusText(errCode),
 		"BeegoVersion": VERSION,
 		"Content":      template.HTML(errContent),
@@ -415,6 +448,9 @@ func exception(errCode string, ctx *context.Context) {
 }
 
 func executeError(err *errorInfo, ctx *context.Context, code int) {
+	//make sure to log the error in the access log
+	LogAccess(ctx, nil, code)
+
 	if err.errorType == errorTypeHandler {
 		ctx.ResponseWriter.WriteHeader(code)
 		err.handler(ctx.ResponseWriter, ctx.Request)
